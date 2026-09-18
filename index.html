@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Contenedor HTML: guarda, clasifica, consulta y comparte todos tus archivos HTML desde un único sitio.">
+<meta name="theme-color" content="#0e1014">
+<title>Contenedor HTML</title>
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Contenedor">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+<!-- ======================= Bloqueo de acceso ======================= -->
+<div class="gate" id="gate">
+  <div class="gate__card">
+    <div class="gate__logo">🗄️</div>
+    <h1 class="gate__title">Contenedor HTML</h1>
+    <p class="gate__sub">Introduce tu PIN para abrir la colección</p>
+
+    <form id="gate-form" autocomplete="off">
+      <input class="input gate__pin" id="gate-pin" type="password" inputmode="numeric"
+             maxlength="32" placeholder="••••" aria-label="PIN de acceso" autocomplete="current-password">
+      <div class="gate__keys" id="gate-keys" aria-hidden="true"></div>
+      <label class="switch gate__remember">
+        <input type="checkbox" id="gate-remember">
+        <span class="switch__track"></span>
+        <span>Recordar en este dispositivo</span>
+      </label>
+      <button class="btn btn--primary btn--block" type="submit" style="margin-top:14px">Abrir</button>
+      <p class="gate__error" id="gate-error" role="alert"></p>
+    </form>
+
+    <p class="gate__foot" id="gate-foot"></p>
+  </div>
+</div>
+
+<!-- ======================= Aplicación ======================= -->
+<div class="app hidden" id="app">
+
+  <header class="topbar">
+    <button class="btn btn--ghost btn--icon sidebar-toggle" id="btn-sidebar" title="Categorías" aria-label="Categorías">☰</button>
+
+    <div class="topbar__brand">
+      <span class="logo">🗄️</span>
+      <span class="topbar__name">Contenedor HTML<small id="brand-sub">tu colección local</small></span>
+    </div>
+
+    <div class="search">
+      <span class="search__icon">🔍</span>
+      <input class="input" id="search" type="search" placeholder="Buscar por título, etiqueta o contenido…"
+             aria-label="Buscar documentos">
+      <button class="btn btn--ghost btn--icon search__clear hidden" id="search-clear" title="Limpiar búsqueda">✕</button>
+    </div>
+
+    <div class="topbar__actions">
+      <button class="btn btn--primary" id="btn-add">＋ Añadir</button>
+      <button class="btn btn--ghost btn--icon" id="btn-settings" title="Ajustes" aria-label="Ajustes">⚙️</button>
+      <button class="btn btn--ghost btn--icon" id="btn-lock" title="Bloquear" aria-label="Bloquear">🔒</button>
+    </div>
+  </header>
+
+  <div class="body">
+    <!-- ---------------- Barra lateral ---------------- -->
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav-main"></nav>
+
+      <div class="sidebar__title">
+        <span>Categorías</span>
+        <button class="btn btn--ghost btn--sm" id="btn-categories" title="Gestionar categorías">Editar</button>
+      </div>
+      <nav id="nav-categories"></nav>
+
+      <div class="sidebar__title"><span>Etiquetas</span></div>
+      <div class="tagcloud" id="tagcloud"></div>
+
+      <div class="sidebar__storage" id="storage-box"></div>
+    </aside>
+    <div class="scrim hidden" id="scrim"></div>
+
+    <!-- ---------------- Zona principal ---------------- -->
+    <main class="main">
+      <div class="toolbar">
+        <h2 class="toolbar__title" id="view-title">Todos los documentos</h2>
+        <span class="toolbar__count" id="view-count"></span>
+        <div class="grow"></div>
+
+        <select class="select" id="sort" style="width:auto" aria-label="Ordenar">
+          <option value="updated-desc">Modificado (reciente)</option>
+          <option value="created-desc">Añadido (reciente)</option>
+          <option value="title-asc">Título (A–Z)</option>
+          <option value="title-desc">Título (Z–A)</option>
+          <option value="size-desc">Tamaño (mayor)</option>
+          <option value="opens-desc">Más abiertos</option>
+        </select>
+
+        <div class="segmented" role="group" aria-label="Forma de ver">
+          <button id="view-grid" class="is-active" title="Cuadrícula">▦</button>
+          <button id="view-list" title="Lista">☰</button>
+        </div>
+
+        <button class="btn btn--ghost btn--sm" id="btn-export-view" title="Exportar lo que se ve como ZIP">⬇️ ZIP</button>
+      </div>
+
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+</div>
+
+<!-- ======================= Panel de documento ======================= -->
+<div class="drawer hidden" id="drawer">
+  <div class="drawer__panel">
+    <div class="drawer__head">
+      <button class="btn btn--ghost btn--icon" id="drawer-close" title="Cerrar" aria-label="Cerrar">✕</button>
+      <h2 class="drawer__title" id="drawer-title">Documento</h2>
+      <button class="btn btn--ghost btn--icon" id="drawer-fav" title="Favorito">☆</button>
+      <button class="btn btn--sm" id="drawer-open" title="Abrir a pantalla completa">↗ Abrir</button>
+      <button class="btn btn--primary btn--sm" id="drawer-share">🔗 Compartir</button>
+    </div>
+
+    <div class="drawer__tabs">
+      <button class="drawer__tab is-active" data-pane="preview">Vista previa</button>
+      <button class="drawer__tab" data-pane="edit">Datos</button>
+      <button class="drawer__tab" data-pane="code">Código</button>
+    </div>
+
+    <div class="drawer__body">
+      <div class="drawer__pane is-active" data-pane="preview" id="pane-preview"></div>
+
+      <div class="drawer__pane drawer__pane--form" data-pane="edit">
+        <div class="field">
+          <label class="field__label" for="edit-title">Título</label>
+          <input class="input" id="edit-title" type="text" maxlength="160">
+        </div>
+        <div class="field">
+          <label class="field__label" for="edit-desc">Descripción</label>
+          <textarea class="textarea" id="edit-desc" style="min-height:70px;font-family:var(--font);font-size:14px"
+                    maxlength="500" placeholder="Para qué sirve, dónde lo usaste…"></textarea>
+        </div>
+        <div class="row">
+          <div class="field grow">
+            <label class="field__label" for="edit-category">Categoría</label>
+            <select class="select" id="edit-category"></select>
+          </div>
+          <div class="field grow">
+            <label class="field__label" for="edit-tags">Etiquetas (separadas por comas)</label>
+            <input class="input" id="edit-tags" type="text" placeholder="cliente, 2024, borrador">
+          </div>
+        </div>
+        <div class="field">
+          <label class="switch">
+            <input type="checkbox" id="edit-trusted">
+            <span class="switch__track"></span>
+            <span>Modo de confianza en la vista previa</span>
+          </label>
+          <p class="field__hint">Actívalo solo si el documento necesita guardar datos propios (almacenamiento del navegador).
+            Le da más permisos dentro de la vista previa, así que úsalo únicamente con documentos tuyos.</p>
+        </div>
+        <dl class="kv" id="edit-info"></dl>
+      </div>
+
+      <div class="drawer__pane" data-pane="code">
+        <textarea class="codebox" id="code-editor" spellcheck="false" aria-label="Código HTML"></textarea>
+      </div>
+    </div>
+
+    <div class="drawer__foot">
+      <button class="btn btn--primary" id="drawer-save">Guardar cambios</button>
+      <button class="btn" id="drawer-download">⬇️ Descargar .html</button>
+      <button class="btn" id="drawer-duplicate">⧉ Duplicar</button>
+      <div class="grow"></div>
+      <button class="btn btn--danger" id="drawer-delete">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Añadir documentos ======================= -->
+<div class="modal hidden" id="modal-import">
+  <div class="modal__panel">
+    <div class="modal__head">
+      <div class="grow">
+        <h2 class="modal__title">Añadir HTML</h2>
+        <p class="modal__sub">Archivos sueltos, carpetas enteras, código pegado o una copia de seguridad.</p>
+      </div>
+      <button class="btn btn--ghost btn--icon" data-close title="Cerrar">✕</button>
+    </div>
+
+    <div class="tabs" id="import-tabs">
+      <button class="is-active" data-tab="files">Archivos</button>
+      <button data-tab="folder">Carpeta</button>
+      <button data-tab="paste">Pegar código</button>
+      <button data-tab="url">Desde una URL</button>
+      <button data-tab="backup">Restaurar copia</button>
+    </div>
+
+    <div class="tabpane is-active" data-tab="files">
+      <div class="dropzone" id="drop-files">
+        <div class="dropzone__icon">📄</div>
+        <p class="dropzone__title">Elige archivos .html o suéltalos aquí</p>
+        <p class="dropzone__hint">Puedes seleccionar muchos a la vez</p>
+      </div>
+      <input type="file" id="input-files" class="hidden" multiple accept=".html,.htm,.xhtml,text/html">
+    </div>
+
+    <div class="tabpane" data-tab="folder">
+      <div class="dropzone" id="drop-folder">
+        <div class="dropzone__icon">📁</div>
+        <p class="dropzone__title">Elige una carpeta completa</p>
+        <p class="dropzone__hint">Se recorren las subcarpetas y el nombre de cada carpeta se guarda como etiqueta</p>
+      </div>
+      <input type="file" id="input-folder" class="hidden" webkitdirectory directory multiple>
+    </div>
+
+    <div class="tabpane" data-tab="paste">
+      <div class="field">
+        <label class="field__label" for="paste-title">Título (opcional)</label>
+        <input class="input" id="paste-title" type="text" placeholder="Se toma del &lt;title&gt; si lo dejas vacío">
+      </div>
+      <div class="field">
+        <label class="field__label" for="paste-code">Código HTML</label>
+        <textarea class="textarea" id="paste-code" placeholder="&lt;!doctype html&gt;…" style="min-height:190px"></textarea>
+      </div>
+      <button class="btn btn--primary" id="btn-paste-save">Guardar documento</button>
+    </div>
+
+    <div class="tabpane" data-tab="url">
+      <div class="field">
+        <label class="field__label" for="url-input">Dirección del archivo</label>
+        <input class="input" id="url-input" type="url" placeholder="https://ejemplo.com/pagina.html">
+        <p class="field__hint">Muchos servidores no permiten la descarga desde otra web. Si falla, descarga el archivo y añádelo desde la pestaña «Archivos».</p>
+      </div>
+      <button class="btn btn--primary" id="btn-url-save">Descargar y guardar</button>
+    </div>
+
+    <div class="tabpane" data-tab="backup">
+      <div class="dropzone" id="drop-backup">
+        <div class="dropzone__icon">🗃️</div>
+        <p class="dropzone__title">Restaurar una copia de seguridad</p>
+        <p class="dropzone__hint">Archivo .json exportado desde esta misma aplicación</p>
+      </div>
+      <input type="file" id="input-backup" class="hidden" accept=".json,application/json">
+    </div>
+
+    <div class="field" style="margin-top:16px">
+      <label class="field__label" for="import-category">Guardar en</label>
+      <select class="select" id="import-category"></select>
+      <p class="field__hint">«Clasificar automáticamente» propone una categoría a partir del contenido de cada archivo.</p>
+    </div>
+
+    <div class="hidden" id="import-progress">
+      <div class="progress"><div class="progress__fill" id="import-progress-fill"></div></div>
+      <p class="field__hint" id="import-progress-text"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Compartir ======================= -->
+<div class="modal hidden" id="modal-share">
+  <div class="modal__panel">
+    <div class="modal__head">
+      <div class="grow">
+        <h2 class="modal__title">Compartir</h2>
+        <p class="modal__sub" id="share-doc-title"></p>
+      </div>
+      <button class="btn btn--ghost btn--icon" data-close title="Cerrar">✕</button>
+    </div>
+
+    <div id="share-body"></div>
+  </div>
+</div>
+
+<!-- ======================= Categorías ======================= -->
+<div class="modal hidden" id="modal-categories">
+  <div class="modal__panel">
+    <div class="modal__head">
+      <div class="grow">
+        <h2 class="modal__title">Categorías</h2>
+        <p class="modal__sub">Crea las tuyas, cámbiales el nombre, el icono o el color.</p>
+      </div>
+      <button class="btn btn--ghost btn--icon" data-close title="Cerrar">✕</button>
+    </div>
+
+    <div id="categories-list"></div>
+
+    <div class="row" style="margin-top:14px">
+      <input class="input emoji" id="new-cat-emoji" type="text" value="🏷️" maxlength="4" style="width:60px;text-align:center" aria-label="Icono">
+      <input class="input grow" id="new-cat-name" type="text" placeholder="Nombre de la categoría nueva" maxlength="40">
+      <input type="color" id="new-cat-color" value="#6d8bff" aria-label="Color">
+      <button class="btn btn--primary" id="btn-add-category">Añadir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Ajustes ======================= -->
+<div class="modal hidden" id="modal-settings">
+  <div class="modal__panel">
+    <div class="modal__head">
+      <div class="grow">
+        <h2 class="modal__title">Ajustes</h2>
+        <p class="modal__sub">Apariencia, seguridad y copias de seguridad.</p>
+      </div>
+      <button class="btn btn--ghost btn--icon" data-close title="Cerrar">✕</button>
+    </div>
+
+    <div class="statgrid" id="stats-grid"></div>
+
+    <div class="field">
+      <label class="field__label">Apariencia</label>
+      <label class="switch" style="margin-bottom:10px">
+        <input type="checkbox" id="set-theme">
+        <span class="switch__track"></span>
+        <span>Tema claro</span>
+      </label>
+      <label class="switch" style="margin-bottom:10px">
+        <input type="checkbox" id="set-previews">
+        <span class="switch__track"></span>
+        <span>Vistas previas animadas (permite scripts en las miniaturas)</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="set-searchcontent">
+        <span class="switch__track"></span>
+        <span>Buscar también dentro del contenido</span>
+      </label>
+    </div>
+
+    <div class="field">
+      <label class="field__label">PIN de acceso</label>
+      <div class="row row--wrap">
+        <input class="input grow" id="set-pin-current" type="password" placeholder="PIN actual" autocomplete="current-password">
+        <input class="input grow" id="set-pin-new" type="password" placeholder="PIN nuevo (mínimo 4)" autocomplete="new-password">
+        <button class="btn" id="btn-change-pin">Cambiar</button>
+      </div>
+      <p class="field__hint">El PIN evita que alguien abra la colección sin querer en tu propio dispositivo. No cifra los
+        documentos: no lo uses como caja fuerte para material sensible.</p>
+    </div>
+
+    <div class="field">
+      <label class="field__label">Copias de seguridad</label>
+      <div class="row row--wrap">
+        <button class="btn" id="btn-backup">🗃️ Exportar copia (.json)</button>
+        <button class="btn" id="btn-export-zip">📦 Exportar todo (.zip)</button>
+        <button class="btn" id="btn-restore">⬆️ Restaurar copia</button>
+      </div>
+      <p class="field__hint" id="storage-detail"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label">Zona delicada</label>
+      <button class="btn btn--danger" id="btn-wipe">Borrar todos los documentos</button>
+    </div>
+
+    <p class="field__hint" id="app-version"></p>
+  </div>
+</div>
+
+<!-- ======================= Confirmación ======================= -->
+<div class="modal hidden" id="modal-confirm">
+  <div class="modal__panel" style="width:min(440px,100%)">
+    <div class="modal__head">
+      <div class="grow">
+        <h2 class="modal__title" id="confirm-title">¿Seguro?</h2>
+        <p class="modal__sub" id="confirm-text"></p>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button class="btn" data-close>Cancelar</button>
+      <button class="btn btn--danger" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Arrastrar sobre la ventana ======================= -->
+<div class="dropveil hidden" id="dropveil">
+  <div class="dropveil__icon">📥</div>
+  <div>Suelta aquí tus archivos o carpetas HTML</div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="assets/js/util.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/zip.js"></script>
+<script src="assets/js/catalog.js"></script>
+<script src="assets/js/importer.js"></script>
+<script src="assets/js/share.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

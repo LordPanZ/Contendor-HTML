@@ -1,0 +1,18 @@
+# sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editores
+.vscode/
+.idea/
+*.swp
+
+# dependencias y resultados de pruebas
+node_modules/
+test-results/
+playwright-report/
+
+# copias exportadas desde la aplicación
+*.zip
+contenedor-html-*.json
