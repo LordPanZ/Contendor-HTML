@@ -1,0 +1,54 @@
+name: Publicar en GitHub Pages
+
+# Publica la aplicación en https://lordpanz.github.io/Contendor-HTML/
+# La primera ejecución activa GitHub Pages por sí sola (configure-pages con
+# enablement), así que no hace falta tocar los ajustes del repositorio.
+
+on:
+  push:
+    branches: [claude/html-storage-app-5iyopq]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una publicación a la vez; no cancelamos una que esté a medias.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Activar y configurar Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Comprobar que el archivo único está al día
+        run: |
+          node tools/construir-unico.mjs
+          if ! git diff --quiet -- descarga/contenedor-html.html; then
+            echo "::error::descarga/contenedor-html.html no coincide con el código fuente. Ejecuta 'node tools/construir-unico.mjs' y vuelve a subirlo."
+            git diff --stat -- descarga/contenedor-html.html
+            exit 1
+          fi
+          echo "El archivo único coincide con el código fuente."
+
+      - name: Empaquetar el sitio
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Publicar
+        id: despliegue
+        uses: actions/deploy-pages@v4

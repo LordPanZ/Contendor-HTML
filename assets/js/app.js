@@ -86,6 +86,17 @@
     updateBrandCount();
     CH.catalog.onChange(updateBrandCount);
     await absorbSharedLink();
+    applyShortcut();
+  }
+
+  /** Accesos directos del icono instalado (manifest → shortcuts). */
+  function applyShortcut() {
+    let accion = '';
+    try { accion = new URLSearchParams(location.search).get('accion') || ''; } catch (e) { return; }
+    if (!accion) return;
+    history.replaceState(null, '', location.pathname + location.hash);
+    if (accion === 'anadir') CH.ui.openImportModal();
+    else if (accion === 'favoritos') CH.catalog.setFilter({ favorites: true, category: 'all', tag: '' });
   }
 
   function updateBrandCount() {

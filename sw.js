@@ -2,7 +2,7 @@
    Solo guarda en caché los archivos de la propia aplicación; los documentos
    viven en la base de datos del navegador, no aquí. */
 
-const CACHE = 'contenedor-html-v1';
+const CACHE = 'contenedor-html-v2';
 
 const SHELL = [
   './',
@@ -22,7 +22,10 @@ const SHELL = [
   'assets/js/viewer.js',
   'assets/icons/icon.svg',
   'assets/icons/icon-192.png',
-  'assets/icons/icon-512.png'
+  'assets/icons/icon-512.png',
+  'assets/icons/icon-maskable-192.png',
+  'assets/icons/icon-maskable-512.png',
+  'assets/icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', function (event) {
