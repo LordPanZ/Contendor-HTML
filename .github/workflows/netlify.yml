@@ -54,6 +54,30 @@ jobs:
             exit 1
           fi
 
+      # «Unauthorized» al publicar puede ser por dos motivos muy distintos; esto
+      # los separa. No imprime nada del token ni de la cuenta: el registro de
+      # Actions de un repositorio público lo puede leer cualquiera.
+      - name: Comprobar el token contra Netlify
+        env:
+          TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          identidad=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" https://api.netlify.com/api/v1/user)
+          sitio=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $TOKEN" "https://api.netlify.com/api/v1/sites/$NETLIFY_SITE_ID")
+          echo "Identificarse en Netlify: HTTP $identidad"
+          echo "Acceder al sitio:         HTTP $sitio"
+
+          if [ "$identidad" != "200" ]; then
+            echo "::error::Netlify no acepta el token (responde $identidad). Suele ser que se copió incompleto o que ha caducado. Crea otro en https://app.netlify.com/user/applications#personal-access-tokens y pégalo entero, sin espacios ni saltos de línea, en el secreto NETLIFY_AUTH_TOKEN."
+            exit 1
+          fi
+          if [ "$sitio" != "200" ]; then
+            echo "::error::El token es válido, pero no tiene acceso al sitio $NETLIFY_SITE_ID (responde $sitio). Lo más probable es que el token se creara en otra cuenta de Netlify distinta de la que tiene el sitio."
+            exit 1
+          fi
+          echo "Token correcto y con acceso al sitio."
+
       - name: Preparar la carpeta a publicar
         run: |
           mkdir -p _sitio
