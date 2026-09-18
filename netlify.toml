@@ -1,0 +1,25 @@
+# Contenedor HTML — sitio estático: no hay que compilar nada, solo publicar la carpeta.
+
+[build]
+  publish = "."
+  command = ""
+
+# El service worker no debe quedarse cacheado: si no, la app no se actualiza nunca.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Content-Type = "application/manifest+json; charset=utf-8"
+
+# Los documentos guardados viven en el navegador de cada persona; aquí solo
+# se sirve la aplicación. Estas cabeceras son de higiene básica.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
