@@ -42,13 +42,21 @@ Luego abre <http://localhost:8080/> en el navegador. El script usa Python o `npx
 > Con el servidor local funciona siempre, se puede instalar como aplicación y los enlaces compartidos
 > apuntan a una dirección de verdad. Sigue siendo 100 % local: solo sirve la carpeta a tu propio navegador.
 
-### Opción 2 · Publicarla en internet (para compartir enlaces)
+### Opción 2 · Publicarla en internet (para el móvil y para compartir enlaces)
 
-Cualquier hosting estático sirve. Con **GitHub Pages**:
+El repositorio ya trae el despliegue montado en `.github/workflows/pages.yml`. Solo falta dar permiso una
+vez, porque activar GitHub Pages por primera vez requiere permisos de administración del repositorio que
+el flujo de trabajo no tiene:
 
-1. En GitHub: *Settings → Pages*.
-2. En *Source*, elige la rama (por ejemplo `main`) y la carpeta `/ (root)`.
-3. Guarda. En un par de minutos tendrás `https://<tu-usuario>.github.io/Contendor-HTML/`.
+1. En GitHub: *Settings → Pages → Build and deployment*.
+2. En *Source*, elige **GitHub Actions** (no «Deploy from a branch»).
+3. Ve a *Actions → Publicar en GitHub Pages → Run workflow*.
+
+A partir de ahí se publica solo en cada subida, en `https://<tu-usuario>.github.io/Contendor-HTML/`.
+El flujo además comprueba que `descarga/contenedor-html.html` sigue coincidiendo con el código fuente.
+
+> Si prefieres *Deploy from a branch*, también funciona (elige la rama y la carpeta `/ (root)`), pero
+> entonces desactiva el flujo de trabajo: con esa opción, publicar desde Actions da error.
 
 Publicar la app **no publica tus documentos**: siguen guardados en el navegador de cada persona. Lo que
 se publica es solo el programa. A partir de ahí, los enlaces que generes al compartir sí funcionarán para
@@ -63,6 +71,7 @@ ventana y funciona sin conexión.
 - **iPhone (Safari)**: botón Compartir → *Añadir a pantalla de inicio*.
 
 Instalada así, la colección se guarda igual que en el ordenador y sigue funcionando sin cobertura.
+Manteniendo pulsado el icono aparecen dos accesos directos: **Añadir HTML** y **Favoritos**.
 
 ---
 
@@ -164,6 +173,7 @@ navegador), puedes activarle *Modo de confianza* en su pestaña «Datos»; hazlo
 ## Estructura del proyecto
 
 ```
+.github/workflows/pages.yml  Publica la app en GitHub Pages en cada subida
 index.html                   Aplicación: bloqueo, interfaz y recepción de enlaces compartidos
 viewer.html                  Visor a pantalla completa (versión servida)
 descarga/contenedor-html.html  La app entera en un archivo (generada)

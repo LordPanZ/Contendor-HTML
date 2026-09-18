@@ -30,9 +30,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Activar y configurar Pages
+        id: pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
+
+      # Crear el sitio por primera vez exige permisos de administración del
+      # repositorio, que el token de Actions no tiene. Si falla, lo explicamos.
+      - name: Cómo activar Pages
+        if: steps.pages.outcome == 'failure'
+        run: |
+          echo "::error::GitHub Pages no está activado todavía y el permiso de este flujo no basta para activarlo."
+          echo ""
+          echo "Actívalo una sola vez, desde el repositorio en GitHub:"
+          echo "    Settings  ->  Pages  ->  Build and deployment  ->  Source: GitHub Actions"
+          echo ""
+          echo "Después vuelve a lanzar este flujo (Actions -> Publicar en GitHub Pages -> Run workflow)"
+          echo "y la aplicación quedará en https://lordpanz.github.io/Contendor-HTML/"
+          exit 1
 
       - name: Comprobar que el archivo único está al día
         run: |
