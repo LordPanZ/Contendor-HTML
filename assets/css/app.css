@@ -159,7 +159,7 @@ a { color: var(--accent); }
 
 /* ---------------- estructura ---------------- */
 
-.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.app { display: flex; flex-direction: column; height: 100%; min-height: 100%; }
 
 .topbar {
   display: flex; align-items: center; gap: 12px; padding: 10px 16px;
@@ -400,7 +400,7 @@ a { color: var(--accent); }
 
 /* ---------------- visor de documentos (viewer.html y enlaces compartidos) ---------------- */
 
-.viewer-page { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+.viewer-page { display: flex; flex-direction: column; height: 100%; min-height: 100%; overflow: hidden; }
 
 .shared {
   position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; background: var(--bg);
