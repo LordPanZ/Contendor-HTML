@@ -810,8 +810,7 @@ CH.ui = (function () {
 
     host.appendChild(el('div', { class: 'filelist' }, [
       el('div', { class: 'filelist__head' }, [
-        el('span', { class: 'filelist__title', text: CH.sources.titulo(listado) }),
-        el('span', { class: 'grow' }),
+        el('span', { class: 'filelist__title', text: CH.sources.titulo(listado), title: CH.sources.titulo(listado) }),
         el('button', { class: 'btn btn--ghost btn--sm', text: 'Todos', onclick: () => alternar(true) }),
         el('button', { class: 'btn btn--ghost btn--sm', text: 'Ninguno', onclick: () => alternar(false) })
       ]),
