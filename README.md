@@ -62,6 +62,17 @@ Publicar la app **no publica tus documentos**: siguen guardados en el navegador 
 se publica es solo el programa. A partir de ahí, los enlaces que generes al compartir sí funcionarán para
 los demás.
 
+### Opción 2b · Netlify
+
+El repositorio trae `netlify.toml` listo (sitio estático, sin compilación, con las cabeceras necesarias
+para que el service worker y el manifiesto no se queden cacheados). Para publicarlo:
+
+1. En Netlify: *Add new project → Import an existing project → GitHub*.
+2. Elige `Contendor-HTML` y la rama `claude/html-storage-app-5iyopq`.
+3. Deja *Publish directory* en `.` y *Build command* vacío. Publicar.
+
+Netlify se encarga del resto y republica en cada subida al repositorio.
+
 ### Opción 3 · Instalarla como aplicación (lo más cómodo en el móvil)
 
 Servida por `http(s)`, el navegador ofrece *Instalar aplicación*. Queda con su icono, se abre en su propia
