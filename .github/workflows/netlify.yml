@@ -1,0 +1,78 @@
+name: Publicar en Netlify
+
+# Publica el sitio en Netlify desde GitHub Actions.
+#
+# Requiere un único secreto en el repositorio:
+#   NETLIFY_AUTH_TOKEN  →  Netlify: foto de perfil → User settings → Applications
+#                          → Personal access tokens → New access token
+#   GitHub: Settings → Secrets and variables → Actions → New repository secret
+#
+# El identificador del sitio ya está puesto abajo (proyecto "contenedor-html").
+
+on:
+  push:
+    branches: [claude/html-storage-app-5iyopq]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify
+  cancel-in-progress: false
+
+env:
+  NETLIFY_SITE_ID: aaa2b6b1-eb26-4d94-9cbc-31b6e3016cdd
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Comprobar que está el secreto
+        env:
+          TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Falta el secreto NETLIFY_AUTH_TOKEN."
+            echo ""
+            echo "1) En Netlify: User settings -> Applications -> Personal access tokens -> New access token"
+            echo "2) En GitHub: Settings -> Secrets and variables -> Actions -> New repository secret"
+            echo "   Nombre: NETLIFY_AUTH_TOKEN     Valor: el token recién creado"
+            echo "3) Vuelve a lanzar este flujo."
+            exit 1
+          fi
+          echo "Secreto presente."
+
+      - name: Comprobar que el archivo único está al día
+        run: |
+          node tools/construir-unico.mjs
+          if ! git diff --quiet -- descarga/contenedor-html.html; then
+            echo "::error::descarga/contenedor-html.html no coincide con el código fuente. Ejecuta 'node tools/construir-unico.mjs' y vuelve a subirlo."
+            exit 1
+          fi
+
+      - name: Preparar la carpeta a publicar
+        run: |
+          mkdir -p _sitio
+          rsync -a \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude '_sitio' \
+            ./ _sitio/
+          echo "Archivos a publicar:"
+          find _sitio -type f | sort | sed 's/^/  /'
+
+      - name: Publicar
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          npx -y netlify-cli@17 deploy \
+            --prod \
+            --no-build \
+            --dir _sitio \
+            --site "$NETLIFY_SITE_ID" \
+            --message "Publicado desde GitHub Actions (${GITHUB_SHA::7})"
