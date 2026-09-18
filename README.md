@@ -97,8 +97,25 @@ Manteniendo pulsado el icono aparecen dos accesos directos: **Añadir HTML** y *
 | **Carpeta** | Recorre una carpeta entera y sus subcarpetas; el nombre de cada carpeta se guarda como etiqueta |
 | **Arrastrar y soltar** | Suelta archivos o carpetas en cualquier punto de la ventana |
 | **Pegar código** | Pega HTML a mano y guárdalo como documento |
+| **GitHub** | Escribe `usuario/repositorio` y te lista todos sus `.html` para elegir cuáles traerte |
+| **Netlify** | Igual, con los archivos publicados de uno de tus sitios |
 | **Desde una URL** | Descarga una página (si el servidor de origen lo permite) |
 | **Restaurar copia** | Recupera un `.json` exportado antes desde la propia app |
+
+### Traerlos de GitHub y de Netlify
+
+En la ventana de **Añadir** hay una pestaña para cada uno:
+
+- **GitHub**: vale `usuario/repositorio`, la dirección del repositorio o la de una carpeta concreta
+  (`.../tree/rama/carpeta`, incluso con ramas que llevan barras). Recorre el repositorio entero, te
+  enseña sus `.html` con su tamaño y tú marcas los que quieras. Para repositorios públicos no hace falta
+  nada más; para los privados, un token. Cada documento queda etiquetado con el nombre del repositorio y
+  guarda de dónde vino (`github:usuario/repo@rama/ruta`).
+- **Netlify**: lista los `.html` publicados en un sitio tuyo. Netlify no deja leer esa lista sin
+  identificarse, así que pide un token (*User settings → Applications → Personal access tokens*).
+
+Los tokens **no se guardan**: solo se usan mientras dure esa importación. Y como en el resto de la app,
+lo que ya tengas guardado no se duplica.
 
 Al entrar cada archivo, la app saca el título del `<title>` (o del primer `<h1>`), calcula su tamaño,
 **detecta repetidos** por el contenido y **propone una categoría** mirando lo que hay dentro
@@ -196,6 +213,7 @@ sw.js                    Service worker (funcionamiento sin conexión)
 assets/css/app.css       Estilos (tema oscuro y claro)
 assets/js/
   util.js                Utilidades: fechas, tamaños, hashes, compresión, descargas, avisos
+  sources.js             Orígenes remotos: repositorios de GitHub y sitios de Netlify
   store.js               Almacenamiento (IndexedDB, con reserva en localStorage)
   zip.js                 Generador de ZIP propio, sin dependencias
   catalog.js             Catálogo: documentos, categorías, filtros, copias, exportación

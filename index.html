@@ -218,6 +218,8 @@
       <button class="is-active" data-tab="files">Archivos</button>
       <button data-tab="folder">Carpeta</button>
       <button data-tab="paste">Pegar código</button>
+      <button data-tab="github">GitHub</button>
+      <button data-tab="netlify">Netlify</button>
       <button data-tab="url">Desde una URL</button>
       <button data-tab="backup">Restaurar copia</button>
     </div>
@@ -250,6 +252,48 @@
         <textarea class="textarea" id="paste-code" placeholder="&lt;!doctype html&gt;…" style="min-height:190px"></textarea>
       </div>
       <button class="btn btn--primary" id="btn-paste-save">Guardar documento</button>
+    </div>
+
+    <div class="tabpane" data-tab="github">
+      <div class="field">
+        <label class="field__label" for="gh-repo">Repositorio</label>
+        <div class="row">
+          <input class="input grow" id="gh-repo" type="text" spellcheck="false"
+                 placeholder="usuario/repositorio · o pega la dirección de GitHub">
+          <button class="btn btn--primary" id="btn-gh-buscar">Buscar</button>
+        </div>
+        <p class="field__hint">Lista todos los .html del repositorio para que elijas cuáles traerte.
+          Si pegas la dirección de una carpeta concreta, solo mira dentro de ella.</p>
+      </div>
+      <div class="row row--wrap">
+        <div class="field grow">
+          <label class="field__label" for="gh-rama">Rama (opcional)</label>
+          <input class="input" id="gh-rama" type="text" spellcheck="false" placeholder="por defecto, la principal">
+        </div>
+        <div class="field grow">
+          <label class="field__label" for="gh-token">Token (solo si es privado)</label>
+          <input class="input" id="gh-token" type="password" autocomplete="off" placeholder="no se guarda en ningún sitio">
+        </div>
+      </div>
+      <div id="gh-result"></div>
+    </div>
+
+    <div class="tabpane" data-tab="netlify">
+      <div class="field">
+        <label class="field__label" for="nf-site">Sitio</label>
+        <div class="row">
+          <input class="input grow" id="nf-site" type="text" spellcheck="false"
+                 placeholder="mi-sitio · mi-sitio.netlify.app · o su dirección">
+          <button class="btn btn--primary" id="btn-nf-buscar">Buscar</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nf-token">Token de Netlify</label>
+        <input class="input" id="nf-token" type="password" autocomplete="off" placeholder="no se guarda en ningún sitio">
+        <p class="field__hint">Netlify no deja leer la lista de archivos de un sitio sin identificarse. El token se crea en
+          <em>User settings → Applications → Personal access tokens</em> y solo se usa mientras dure esta importación.</p>
+      </div>
+      <div id="nf-result"></div>
     </div>
 
     <div class="tabpane" data-tab="url">
@@ -410,6 +454,7 @@
 <script src="assets/js/store.js"></script>
 <script src="assets/js/zip.js"></script>
 <script src="assets/js/catalog.js"></script>
+<script src="assets/js/sources.js"></script>
 <script src="assets/js/importer.js"></script>
 <script src="assets/js/share.js"></script>
 <script src="assets/js/auth.js"></script>

@@ -451,6 +451,25 @@ a { color: var(--accent); }
   .vbar__badge, .vbar .label { display: none; }
 }
 
+/* ---------------- listado de archivos remotos (GitHub / Netlify) ---------------- */
+
+.filelist { margin-top: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-soft); overflow: hidden; }
+.filelist__head {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-bottom: 1px solid var(--border); font-size: 13px; flex-wrap: wrap;
+}
+.filelist__title { font-weight: 600; }
+.filelist__items { max-height: 250px; overflow-y: auto; padding: 4px; }
+.fileitem {
+  display: flex; align-items: center; gap: 10px; padding: 6px 8px;
+  border-radius: 6px; cursor: pointer; user-select: none;
+}
+.fileitem:hover { background: var(--surface-2); }
+.fileitem input { flex: none; accent-color: var(--accent); }
+.fileitem__path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 12px; }
+.fileitem__size { flex: none; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.filelist__foot { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
 /* ---------------- avisos flotantes ---------------- */
 
 .toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
@@ -706,6 +725,8 @@ a { color: var(--accent); }
       <button class="is-active" data-tab="files">Archivos</button>
       <button data-tab="folder">Carpeta</button>
       <button data-tab="paste">Pegar código</button>
+      <button data-tab="github">GitHub</button>
+      <button data-tab="netlify">Netlify</button>
       <button data-tab="url">Desde una URL</button>
       <button data-tab="backup">Restaurar copia</button>
     </div>
@@ -738,6 +759,48 @@ a { color: var(--accent); }
         <textarea class="textarea" id="paste-code" placeholder="&lt;!doctype html&gt;…" style="min-height:190px"></textarea>
       </div>
       <button class="btn btn--primary" id="btn-paste-save">Guardar documento</button>
+    </div>
+
+    <div class="tabpane" data-tab="github">
+      <div class="field">
+        <label class="field__label" for="gh-repo">Repositorio</label>
+        <div class="row">
+          <input class="input grow" id="gh-repo" type="text" spellcheck="false"
+                 placeholder="usuario/repositorio · o pega la dirección de GitHub">
+          <button class="btn btn--primary" id="btn-gh-buscar">Buscar</button>
+        </div>
+        <p class="field__hint">Lista todos los .html del repositorio para que elijas cuáles traerte.
+          Si pegas la dirección de una carpeta concreta, solo mira dentro de ella.</p>
+      </div>
+      <div class="row row--wrap">
+        <div class="field grow">
+          <label class="field__label" for="gh-rama">Rama (opcional)</label>
+          <input class="input" id="gh-rama" type="text" spellcheck="false" placeholder="por defecto, la principal">
+        </div>
+        <div class="field grow">
+          <label class="field__label" for="gh-token">Token (solo si es privado)</label>
+          <input class="input" id="gh-token" type="password" autocomplete="off" placeholder="no se guarda en ningún sitio">
+        </div>
+      </div>
+      <div id="gh-result"></div>
+    </div>
+
+    <div class="tabpane" data-tab="netlify">
+      <div class="field">
+        <label class="field__label" for="nf-site">Sitio</label>
+        <div class="row">
+          <input class="input grow" id="nf-site" type="text" spellcheck="false"
+                 placeholder="mi-sitio · mi-sitio.netlify.app · o su dirección">
+          <button class="btn btn--primary" id="btn-nf-buscar">Buscar</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field__label" for="nf-token">Token de Netlify</label>
+        <input class="input" id="nf-token" type="password" autocomplete="off" placeholder="no se guarda en ningún sitio">
+        <p class="field__hint">Netlify no deja leer la lista de archivos de un sitio sin identificarse. El token se crea en
+          <em>User settings → Applications → Personal access tokens</em> y solo se usa mientras dure esta importación.</p>
+      </div>
+      <div id="nf-result"></div>
     </div>
 
     <div class="tabpane" data-tab="url">
@@ -1943,6 +2006,272 @@ CH.catalog = (function () {
 })();
 </script>
 <script>
+/* assets/js/sources.js */
+/* Contenedor HTML — orígenes remotos: traer documentos de GitHub y de Netlify */
+window.CH = window.CH || {};
+
+CH.sources = (function () {
+  'use strict';
+
+  const U = CH.util;
+  const ES_HTML = /\.(html?|xhtml|shtml)$/i;
+
+  async function pedirJson(url, cabeceras) {
+    let res;
+    try {
+      res = await fetch(url, { headers: cabeceras || {}, credentials: 'omit' });
+    } catch (e) {
+      throw new Error('No se pudo conectar. Revisa la conexión o la dirección.');
+    }
+    if (res.status === 401 || res.status === 403) {
+      const restante = res.headers.get('X-RateLimit-Remaining');
+      if (restante === '0') {
+        throw new Error('GitHub ha cortado por exceso de consultas (60 por hora sin identificarse). Espera un rato o añade un token.');
+      }
+      throw new Error('Acceso denegado. Si el repositorio o el sitio es privado, necesitas un token.');
+    }
+    if (res.status === 404) throw new Error('No encontrado. Comprueba el nombre, la rama o el sitio.');
+    if (!res.ok) throw new Error('El servidor respondió ' + res.status + '.');
+    return res.json();
+  }
+
+  /* ======================= GitHub ======================= */
+
+  /** Acepta «usuario/repo», la URL del repositorio o la de una carpeta concreta. */
+  function parseRepo(entrada) {
+    let texto = String(entrada || '').trim();
+    if (!texto) throw new Error('Escribe el repositorio.');
+
+    texto = texto.replace(/^git@github\.com:/, 'https://github.com/');
+    let rama = '';
+    let carpeta = '';
+
+    if (/^https?:\/\//i.test(texto)) {
+      let url;
+      try { url = new URL(texto); } catch (e) { throw new Error('Esa dirección no es válida.'); }
+      if (!/(^|\.)github\.com$/i.test(url.hostname)) throw new Error('Esa dirección no es de GitHub.');
+      const partes = url.pathname.replace(/^\/+|\/+$/g, '').split('/');
+      if (partes.length < 2) throw new Error('Falta el nombre del repositorio.');
+      const propietario = partes[0];
+      const repo = partes[1].replace(/\.git$/i, '');
+      // .../tree/<rama>/<carpeta>: la rama puede llevar barras, así que la
+      // resolvemos más tarde contra la lista real de ramas.
+      const resto = partes.slice(3).join('/');
+      if (partes[2] === 'tree' && resto) rama = resto;
+      return { propietario: propietario, repo: repo, ramaSugerida: rama, carpeta: carpeta };
+    }
+
+    const partes = texto.replace(/^\/+|\/+$/g, '').split('/');
+    if (partes.length < 2) throw new Error('Escríbelo como «usuario/repositorio».');
+    return {
+      propietario: partes[0],
+      repo: partes[1].replace(/\.git$/i, ''),
+      ramaSugerida: '',
+      carpeta: partes.slice(2).join('/')
+    };
+  }
+
+  const cabecerasGitHub = (token) => {
+    const h = { Accept: 'application/vnd.github+json' };
+    if (token) h.Authorization = 'Bearer ' + token;
+    return h;
+  };
+
+  /**
+   * Devuelve los .html del repositorio.
+   * opciones: { entrada, rama, carpeta, token }
+   */
+  async function listarGitHub(opciones) {
+    const ref = parseRepo(opciones.entrada);
+    const token = (opciones.token || '').trim();
+    const cabeceras = cabecerasGitHub(token);
+    const base = 'https://api.github.com/repos/' + encodeURIComponent(ref.propietario) + '/' + encodeURIComponent(ref.repo);
+
+    let rama = (opciones.rama || '').trim();
+    let carpeta = (opciones.carpeta || ref.carpeta || '').replace(/^\/+|\/+$/g, '');
+
+    if (!rama) {
+      if (ref.ramaSugerida) {
+        // «tree/<algo>»: puede ser toda la rama, o rama + carpeta. Probamos por partes.
+        const candidato = await resolverRama(base, ref.ramaSugerida, cabeceras);
+        rama = candidato.rama;
+        if (candidato.carpeta) carpeta = carpeta ? candidato.carpeta + '/' + carpeta : candidato.carpeta;
+      } else {
+        const info = await pedirJson(base, cabeceras);
+        rama = info.default_branch || 'main';
+      }
+    }
+
+    const arbol = await pedirJson(base + '/git/trees/' + encodeURIComponent(rama) + '?recursive=1', cabeceras);
+    const prefijo = carpeta ? carpeta + '/' : '';
+
+    const archivos = (arbol.tree || [])
+      .filter((n) => n.type === 'blob' && ES_HTML.test(n.path) && (!prefijo || n.path.indexOf(prefijo) === 0))
+      .map((n) => ({
+        ruta: n.path,
+        nombre: n.path.split('/').pop(),
+        tamano: n.size || 0,
+        origen: 'github:' + ref.propietario + '/' + ref.repo + '@' + rama + '/' + n.path
+      }))
+      .sort((a, b) => a.ruta.localeCompare(b.ruta, 'es'));
+
+    return {
+      tipo: 'github',
+      propietario: ref.propietario,
+      repo: ref.repo,
+      rama: rama,
+      carpeta: carpeta,
+      etiqueta: ref.repo.toLowerCase().slice(0, 30),
+      truncado: !!arbol.truncated,
+      archivos: archivos,
+      token: token
+    };
+  }
+
+  /**
+   * «tree/a/b/c» puede ser la rama «a/b/c» o la rama «a» con la carpeta «b/c».
+   * Pedimos la lista de ramas una sola vez y nos quedamos con la más larga que
+   * encaje: así no hay que ir probando a ciegas.
+   */
+  async function resolverRama(base, sugerida, cabeceras) {
+    let ramas = [];
+    try {
+      const lista = await pedirJson(base + '/branches?per_page=100', cabeceras);
+      ramas = (lista || []).map((b) => b.name).filter(Boolean);
+    } catch (e) {
+      if (/denegado|consultas/i.test(e.message)) throw e;
+    }
+
+    const encaja = ramas
+      .filter((n) => sugerida === n || sugerida.indexOf(n + '/') === 0)
+      .sort((a, b) => b.length - a.length)[0];
+
+    if (encaja) {
+      return { rama: encaja, carpeta: sugerida.slice(encaja.length).replace(/^\/+/, '') };
+    }
+
+    // Con más de 100 ramas la lista puede venir cortada: probamos por partes.
+    if (ramas.length >= 100) {
+      const partes = sugerida.split('/');
+      for (let corte = partes.length; corte >= 1; corte--) {
+        const rama = partes.slice(0, corte).join('/');
+        try {
+          await pedirJson(base + '/branches/' + encodeURIComponent(rama), cabeceras);
+          return { rama: rama, carpeta: partes.slice(corte).join('/') };
+        } catch (e) {
+          if (/denegado|consultas/i.test(e.message)) throw e;
+        }
+      }
+    }
+    throw new Error('No existe esa rama en el repositorio.');
+  }
+
+  async function descargarGitHub(listado, archivo) {
+    // Sin token tiramos del CDN de contenido, que no gasta cupo de la API.
+    if (!listado.token) {
+      // Ojo: aquí la rama va dentro de la ruta, así que sus barras deben
+      // quedarse tal cual (ramas como «equipo/funcion» son habituales).
+      const rama = listado.rama.split('/').map(encodeURIComponent).join('/');
+      const url = 'https://raw.githubusercontent.com/' + encodeURIComponent(listado.propietario) + '/' +
+        encodeURIComponent(listado.repo) + '/' + rama + '/' +
+        archivo.ruta.split('/').map(encodeURIComponent).join('/');
+      const res = await fetch(url, { credentials: 'omit' });
+      if (!res.ok) throw new Error('no se pudo descargar (' + res.status + ')');
+      return res.text();
+    }
+    const url = 'https://api.github.com/repos/' + listado.propietario + '/' + listado.repo + '/contents/' +
+      archivo.ruta.split('/').map(encodeURIComponent).join('/') + '?ref=' + encodeURIComponent(listado.rama);
+    const res = await fetch(url, {
+      headers: { Accept: 'application/vnd.github.raw', Authorization: 'Bearer ' + listado.token },
+      credentials: 'omit'
+    });
+    if (!res.ok) throw new Error('no se pudo descargar (' + res.status + ')');
+    return res.text();
+  }
+
+  /* ======================= Netlify ======================= */
+
+  /** Acepta el nombre del sitio, su dirección o su identificador. */
+  function parseSitio(entrada) {
+    const texto = String(entrada || '').trim().replace(/\/+$/, '');
+    if (!texto) throw new Error('Escribe el sitio.');
+    if (/^https?:\/\//i.test(texto)) {
+      try { return new URL(texto).hostname; } catch (e) { throw new Error('Esa dirección no es válida.'); }
+    }
+    if (/^[0-9a-f-]{30,}$/i.test(texto)) return texto;            // identificador
+    if (texto.indexOf('.') !== -1) return texto;                   // ya es un dominio
+    return texto + '.netlify.app';
+  }
+
+  const API_NETLIFY = 'https://api.netlify.com/api/v1';
+
+  /** opciones: { entrada, token } */
+  async function listarNetlify(opciones) {
+    const token = (opciones.token || '').trim();
+    if (!token) throw new Error('Netlify necesita un token para leer los archivos del sitio.');
+    const sitio = parseSitio(opciones.entrada);
+    const cabeceras = { Authorization: 'Bearer ' + token };
+
+    const info = await pedirJson(API_NETLIFY + '/sites/' + encodeURIComponent(sitio), cabeceras);
+    const listado = await pedirJson(API_NETLIFY + '/sites/' + encodeURIComponent(info.id || sitio) + '/files', cabeceras);
+
+    const archivos = (Array.isArray(listado) ? listado : [])
+      .filter((f) => ES_HTML.test(f.path || f.id || ''))
+      .map(function (f) {
+        const ruta = String(f.path || f.id).replace(/^\/+/, '');
+        return {
+          ruta: ruta,
+          nombre: ruta.split('/').pop() || 'index.html',
+          tamano: f.size || 0,
+          origen: 'netlify:' + (info.name || sitio) + '/' + ruta
+        };
+      })
+      .sort((a, b) => a.ruta.localeCompare(b.ruta, 'es'));
+
+    return {
+      tipo: 'netlify',
+      sitioId: info.id || sitio,
+      nombre: info.name || sitio,
+      url: info.ssl_url || info.url || ('https://' + sitio),
+      etiqueta: String(info.name || sitio).toLowerCase().slice(0, 30),
+      truncado: false,
+      archivos: archivos,
+      token: token
+    };
+  }
+
+  async function descargarNetlify(listado, archivo) {
+    const url = API_NETLIFY + '/sites/' + encodeURIComponent(listado.sitioId) + '/files/' +
+      archivo.ruta.split('/').map(encodeURIComponent).join('/');
+    const res = await fetch(url, {
+      headers: {
+        Authorization: 'Bearer ' + listado.token,
+        // Netlify devuelve el contenido en crudo con esta cabecera.
+        Accept: 'application/vnd.bitballoon.v1.raw'
+      },
+      credentials: 'omit'
+    });
+    if (!res.ok) throw new Error('no se pudo descargar (' + res.status + ')');
+    return res.text();
+  }
+
+  /* ======================= común ======================= */
+
+  const listar = (tipo, opciones) => (tipo === 'github' ? listarGitHub(opciones) : listarNetlify(opciones));
+  const descargar = (listado, archivo) =>
+    (listado.tipo === 'github' ? descargarGitHub(listado, archivo) : descargarNetlify(listado, archivo));
+
+  function titulo(listado) {
+    if (listado.tipo === 'github') {
+      return listado.propietario + '/' + listado.repo + ' · ' + listado.rama + (listado.carpeta ? ' · ' + listado.carpeta : '');
+    }
+    return listado.nombre;
+  }
+
+  return { listar, descargar, titulo, parseRepo, parseSitio, listarGitHub, listarNetlify };
+})();
+</script>
+<script>
 /* assets/js/importer.js */
 /* Contenedor HTML — importación desde archivos, carpetas, arrastrar y soltar, URL o texto */
 window.CH = window.CH || {};
@@ -2073,6 +2402,60 @@ CH.importer = (function () {
     return out;
   }
 
+  /** Una descarga suelta puede fallar por la red (móvil, wifi flojo): reintentamos. */
+  async function conReintentos(tarea, intentos) {
+    const veces = intentos || 3;
+    let ultimo = null;
+    for (let i = 0; i < veces; i++) {
+      try {
+        return await tarea();
+      } catch (err) {
+        ultimo = err;
+        if (i < veces - 1) await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+      }
+    }
+    throw ultimo;
+  }
+
+  /**
+   * Importa los archivos elegidos de un origen remoto (GitHub o Netlify).
+   * listado: lo que devuelve CH.sources.listar · seleccion: subconjunto de listado.archivos
+   * options: { category, tags, onProgress(hechos, total, ruta) }
+   */
+  async function importFromSource(listado, seleccion, options) {
+    const opts = options || {};
+    const result = { added: 0, duplicated: 0, skipped: 0, errors: [] };
+    let done = 0;
+
+    for (const archivo of seleccion) {
+      done++;
+      if (opts.onProgress) opts.onProgress(done, seleccion.length, archivo.ruta);
+      try {
+        if (archivo.tamano > MAX_FILE_BYTES) {
+          result.errors.push(archivo.nombre + ': supera los ' + U.formatBytes(MAX_FILE_BYTES));
+          result.skipped++;
+          continue;
+        }
+        const html = await conReintentos(() => CH.sources.descargar(listado, archivo));
+        if (!html || !html.trim()) { result.skipped++; continue; }
+
+        const etiquetas = (opts.tags || []).slice();
+        if (listado.etiqueta && etiquetas.indexOf(listado.etiqueta) === -1) etiquetas.push(listado.etiqueta);
+
+        const res = await catalog.addDocument({
+          html: html,
+          source: archivo.origen,
+          category: opts.category || undefined,
+          tags: etiquetas
+        });
+        if (res.duplicate) result.duplicated++; else result.added++;
+      } catch (err) {
+        result.errors.push(archivo.nombre + ': ' + (err && err.message ? err.message : 'error al importar'));
+      }
+    }
+    return result;
+  }
+
   async function importFromText(html, meta) {
     const info = meta || {};
     return catalog.addDocument({
@@ -2109,7 +2492,7 @@ CH.importer = (function () {
   }
 
   return {
-    importFiles, importFromText, importFromUrl, filesFromDataTransfer,
+    importFiles, importFromText, importFromUrl, importFromSource, filesFromDataTransfer,
     readFileAsText, isHtmlFile, isBackup, MAX_FILE_BYTES
   };
 })();
@@ -2957,6 +3340,27 @@ CH.ui = (function () {
       });
     });
 
+    wireRemoteTab('github', {
+      boton: '#btn-gh-buscar',
+      resultado: '#gh-result',
+      leer: () => ({
+        entrada: $('#gh-repo').value,
+        rama: $('#gh-rama').value,
+        token: $('#gh-token').value
+      })
+    });
+    wireRemoteTab('netlify', {
+      boton: '#btn-nf-buscar',
+      resultado: '#nf-result',
+      leer: () => ({
+        entrada: $('#nf-site').value,
+        token: $('#nf-token').value
+      })
+    });
+
+    $('#gh-repo').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') $('#btn-gh-buscar').click(); });
+    $('#nf-site').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') $('#btn-nf-buscar').click(); });
+
     bindPicker('#drop-files', '#input-files');
     bindPicker('#drop-folder', '#input-folder');
     bindPicker('#drop-backup', '#input-backup');
@@ -3013,6 +3417,127 @@ CH.ui = (function () {
       }
     });
 
+  }
+
+  /* ---- orígenes remotos: GitHub y Netlify ---- */
+
+  /** Las dos pestañas se comportan igual: buscar, elegir de una lista e importar. */
+  function wireRemoteTab(tipo, cfg) {
+    const boton = $(cfg.boton);
+    boton.addEventListener('click', async function () {
+      const host = $(cfg.resultado);
+      const etiquetaBoton = boton.textContent;
+      boton.disabled = true;
+      boton.textContent = 'Buscando…';
+      host.textContent = '';
+      host.appendChild(el('p', { class: 'field__hint', text: 'Consultando…' }));
+
+      try {
+        const listado = await CH.sources.listar(tipo, cfg.leer());
+        renderRemoteList(host, listado);
+      } catch (err) {
+        host.textContent = '';
+        host.appendChild(el('div', { class: 'notice notice--danger', text: err && err.message ? err.message : 'No se pudo consultar.' }));
+      } finally {
+        boton.disabled = false;
+        boton.textContent = etiquetaBoton;
+      }
+    });
+  }
+
+  function renderRemoteList(host, listado) {
+    host.textContent = '';
+
+    if (!listado.archivos.length) {
+      host.appendChild(el('div', { class: 'notice notice--warn', text: 'No hay ningún archivo .html en ' + CH.sources.titulo(listado) + '.' }));
+      return;
+    }
+
+    const items = el('div', { class: 'filelist__items' });
+    const casillas = [];
+
+    listado.archivos.forEach(function (archivo) {
+      const casilla = el('input', { type: 'checkbox', checked: true });
+      casillas.push({ casilla: casilla, archivo: archivo });
+      items.appendChild(el('label', { class: 'fileitem' }, [
+        casilla,
+        el('span', { class: 'fileitem__path', text: archivo.ruta, title: archivo.ruta }),
+        el('span', { class: 'fileitem__size', text: archivo.tamano ? U.formatBytes(archivo.tamano) : '' })
+      ]));
+    });
+
+    const contador = el('span', { class: 'fileitem__size' });
+    const importar = el('button', { class: 'btn btn--primary' });
+
+    function actualizar() {
+      const n = casillas.filter((c) => c.casilla.checked).length;
+      contador.textContent = n + ' de ' + casillas.length + ' seleccionados';
+      importar.textContent = n ? 'Importar ' + n + (n === 1 ? ' documento' : ' documentos') : 'Nada seleccionado';
+      importar.disabled = !n;
+    }
+    casillas.forEach((c) => c.casilla.addEventListener('change', actualizar));
+
+    const alternar = function (valor) {
+      casillas.forEach((c) => { c.casilla.checked = valor; });
+      actualizar();
+    };
+
+    importar.addEventListener('click', async function () {
+      const seleccion = casillas.filter((c) => c.casilla.checked).map((c) => c.archivo);
+      if (!seleccion.length) return;
+      await importarRemotos(listado, seleccion);
+    });
+
+    host.appendChild(el('div', { class: 'filelist' }, [
+      el('div', { class: 'filelist__head' }, [
+        el('span', { class: 'filelist__title', text: CH.sources.titulo(listado) }),
+        el('span', { class: 'grow' }),
+        el('button', { class: 'btn btn--ghost btn--sm', text: 'Todos', onclick: () => alternar(true) }),
+        el('button', { class: 'btn btn--ghost btn--sm', text: 'Ninguno', onclick: () => alternar(false) })
+      ]),
+      items,
+      el('div', { class: 'filelist__foot' }, [contador, el('span', { class: 'grow' }), importar])
+    ]));
+
+    if (listado.truncado) {
+      host.appendChild(el('div', {
+        class: 'notice notice--warn',
+        text: 'El repositorio es muy grande y GitHub ha devuelto la lista recortada: puede faltar algún archivo. Prueba a indicar una carpeta concreta.'
+      }));
+    }
+
+    actualizar();
+  }
+
+  async function importarRemotos(listado, seleccion) {
+    const box = $('#import-progress');
+    const fill = $('#import-progress-fill');
+    const text = $('#import-progress-text');
+    box.classList.remove('hidden');
+
+    const categoria = $('#import-category') ? $('#import-category').value : 'auto';
+    const result = await importer.importFromSource(listado, seleccion, {
+      category: categoria === 'auto' ? undefined : categoria,
+      onProgress: function (hechos, total, ruta) {
+        fill.style.width = Math.round((hechos / total) * 100) + '%';
+        text.textContent = hechos + ' de ' + total + ' · ' + ruta;
+      }
+    });
+
+    box.classList.add('hidden');
+    fill.style.width = '0';
+    text.textContent = '';
+    closeModal($('#modal-import'));
+
+    const partes = [];
+    if (result.added) partes.push(result.added + ' añadidos');
+    if (result.duplicated) partes.push(result.duplicated + ' repetidos (omitidos)');
+    if (result.skipped) partes.push(result.skipped + ' descartados');
+    U.toast(partes.length ? partes.join(' · ') : 'No se importó nada', result.added ? 'ok' : 'warn', 5000);
+    if (result.errors.length) {
+      U.toast(result.errors.slice(0, 3).join(' | ') + (result.errors.length > 3 ? ' …' : ''), 'error', 7000);
+    }
+    refreshStorageBox();
   }
 
   function bindPicker(zoneSel, inputSel) {
@@ -3532,9 +4057,13 @@ CH.ui = (function () {
       console.warn('Contenedor HTML: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
     }
 
-    if (!window.CH_ARCHIVO_UNICO && 'serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-      navigator.serviceWorker.register('sw.js').catch(function () { /* sin modo sin conexión */ });
-    }
+    // Dentro de un iframe aislado, leer navigator.serviceWorker lanza excepción
+    // (pasa al previsualizar un documento que a su vez es una app instalable).
+    try {
+      if (!window.CH_ARCHIVO_UNICO && 'serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+        navigator.serviceWorker.register('sw.js').catch(function () { /* sin modo sin conexión */ });
+      }
+    } catch (e) { /* sin service worker disponible aquí */ }
 
     const hash = location.hash || '';
     if (hash.indexOf('#d=') === 0) {

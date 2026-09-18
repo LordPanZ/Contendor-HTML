@@ -127,6 +127,60 @@ CH.importer = (function () {
     return out;
   }
 
+  /** Una descarga suelta puede fallar por la red (móvil, wifi flojo): reintentamos. */
+  async function conReintentos(tarea, intentos) {
+    const veces = intentos || 3;
+    let ultimo = null;
+    for (let i = 0; i < veces; i++) {
+      try {
+        return await tarea();
+      } catch (err) {
+        ultimo = err;
+        if (i < veces - 1) await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+      }
+    }
+    throw ultimo;
+  }
+
+  /**
+   * Importa los archivos elegidos de un origen remoto (GitHub o Netlify).
+   * listado: lo que devuelve CH.sources.listar · seleccion: subconjunto de listado.archivos
+   * options: { category, tags, onProgress(hechos, total, ruta) }
+   */
+  async function importFromSource(listado, seleccion, options) {
+    const opts = options || {};
+    const result = { added: 0, duplicated: 0, skipped: 0, errors: [] };
+    let done = 0;
+
+    for (const archivo of seleccion) {
+      done++;
+      if (opts.onProgress) opts.onProgress(done, seleccion.length, archivo.ruta);
+      try {
+        if (archivo.tamano > MAX_FILE_BYTES) {
+          result.errors.push(archivo.nombre + ': supera los ' + U.formatBytes(MAX_FILE_BYTES));
+          result.skipped++;
+          continue;
+        }
+        const html = await conReintentos(() => CH.sources.descargar(listado, archivo));
+        if (!html || !html.trim()) { result.skipped++; continue; }
+
+        const etiquetas = (opts.tags || []).slice();
+        if (listado.etiqueta && etiquetas.indexOf(listado.etiqueta) === -1) etiquetas.push(listado.etiqueta);
+
+        const res = await catalog.addDocument({
+          html: html,
+          source: archivo.origen,
+          category: opts.category || undefined,
+          tags: etiquetas
+        });
+        if (res.duplicate) result.duplicated++; else result.added++;
+      } catch (err) {
+        result.errors.push(archivo.nombre + ': ' + (err && err.message ? err.message : 'error al importar'));
+      }
+    }
+    return result;
+  }
+
   async function importFromText(html, meta) {
     const info = meta || {};
     return catalog.addDocument({
@@ -163,7 +217,7 @@ CH.importer = (function () {
   }
 
   return {
-    importFiles, importFromText, importFromUrl, filesFromDataTransfer,
+    importFiles, importFromText, importFromUrl, importFromSource, filesFromDataTransfer,
     readFileAsText, isHtmlFile, isBackup, MAX_FILE_BYTES
   };
 })();

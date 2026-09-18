@@ -195,9 +195,13 @@
       console.warn('Contenedor HTML: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
     }
 
-    if (!window.CH_ARCHIVO_UNICO && 'serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
-      navigator.serviceWorker.register('sw.js').catch(function () { /* sin modo sin conexión */ });
-    }
+    // Dentro de un iframe aislado, leer navigator.serviceWorker lanza excepción
+    // (pasa al previsualizar un documento que a su vez es una app instalable).
+    try {
+      if (!window.CH_ARCHIVO_UNICO && 'serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+        navigator.serviceWorker.register('sw.js').catch(function () { /* sin modo sin conexión */ });
+      }
+    } catch (e) { /* sin service worker disponible aquí */ }
 
     const hash = location.hash || '';
     if (hash.indexOf('#d=') === 0) {

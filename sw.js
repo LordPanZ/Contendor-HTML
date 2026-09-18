@@ -2,7 +2,7 @@
    Solo guarda en caché los archivos de la propia aplicación; los documentos
    viven en la base de datos del navegador, no aquí. */
 
-const CACHE = 'contenedor-html-v2';
+const CACHE = 'contenedor-html-v3';
 
 const SHELL = [
   './',
@@ -14,6 +14,7 @@ const SHELL = [
   'assets/js/store.js',
   'assets/js/zip.js',
   'assets/js/catalog.js',
+  'assets/js/sources.js',
   'assets/js/importer.js',
   'assets/js/share.js',
   'assets/js/auth.js',

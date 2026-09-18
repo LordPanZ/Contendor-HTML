@@ -660,6 +660,27 @@ CH.ui = (function () {
       });
     });
 
+    wireRemoteTab('github', {
+      boton: '#btn-gh-buscar',
+      resultado: '#gh-result',
+      leer: () => ({
+        entrada: $('#gh-repo').value,
+        rama: $('#gh-rama').value,
+        token: $('#gh-token').value
+      })
+    });
+    wireRemoteTab('netlify', {
+      boton: '#btn-nf-buscar',
+      resultado: '#nf-result',
+      leer: () => ({
+        entrada: $('#nf-site').value,
+        token: $('#nf-token').value
+      })
+    });
+
+    $('#gh-repo').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') $('#btn-gh-buscar').click(); });
+    $('#nf-site').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') $('#btn-nf-buscar').click(); });
+
     bindPicker('#drop-files', '#input-files');
     bindPicker('#drop-folder', '#input-folder');
     bindPicker('#drop-backup', '#input-backup');
@@ -716,6 +737,127 @@ CH.ui = (function () {
       }
     });
 
+  }
+
+  /* ---- orígenes remotos: GitHub y Netlify ---- */
+
+  /** Las dos pestañas se comportan igual: buscar, elegir de una lista e importar. */
+  function wireRemoteTab(tipo, cfg) {
+    const boton = $(cfg.boton);
+    boton.addEventListener('click', async function () {
+      const host = $(cfg.resultado);
+      const etiquetaBoton = boton.textContent;
+      boton.disabled = true;
+      boton.textContent = 'Buscando…';
+      host.textContent = '';
+      host.appendChild(el('p', { class: 'field__hint', text: 'Consultando…' }));
+
+      try {
+        const listado = await CH.sources.listar(tipo, cfg.leer());
+        renderRemoteList(host, listado);
+      } catch (err) {
+        host.textContent = '';
+        host.appendChild(el('div', { class: 'notice notice--danger', text: err && err.message ? err.message : 'No se pudo consultar.' }));
+      } finally {
+        boton.disabled = false;
+        boton.textContent = etiquetaBoton;
+      }
+    });
+  }
+
+  function renderRemoteList(host, listado) {
+    host.textContent = '';
+
+    if (!listado.archivos.length) {
+      host.appendChild(el('div', { class: 'notice notice--warn', text: 'No hay ningún archivo .html en ' + CH.sources.titulo(listado) + '.' }));
+      return;
+    }
+
+    const items = el('div', { class: 'filelist__items' });
+    const casillas = [];
+
+    listado.archivos.forEach(function (archivo) {
+      const casilla = el('input', { type: 'checkbox', checked: true });
+      casillas.push({ casilla: casilla, archivo: archivo });
+      items.appendChild(el('label', { class: 'fileitem' }, [
+        casilla,
+        el('span', { class: 'fileitem__path', text: archivo.ruta, title: archivo.ruta }),
+        el('span', { class: 'fileitem__size', text: archivo.tamano ? U.formatBytes(archivo.tamano) : '' })
+      ]));
+    });
+
+    const contador = el('span', { class: 'fileitem__size' });
+    const importar = el('button', { class: 'btn btn--primary' });
+
+    function actualizar() {
+      const n = casillas.filter((c) => c.casilla.checked).length;
+      contador.textContent = n + ' de ' + casillas.length + ' seleccionados';
+      importar.textContent = n ? 'Importar ' + n + (n === 1 ? ' documento' : ' documentos') : 'Nada seleccionado';
+      importar.disabled = !n;
+    }
+    casillas.forEach((c) => c.casilla.addEventListener('change', actualizar));
+
+    const alternar = function (valor) {
+      casillas.forEach((c) => { c.casilla.checked = valor; });
+      actualizar();
+    };
+
+    importar.addEventListener('click', async function () {
+      const seleccion = casillas.filter((c) => c.casilla.checked).map((c) => c.archivo);
+      if (!seleccion.length) return;
+      await importarRemotos(listado, seleccion);
+    });
+
+    host.appendChild(el('div', { class: 'filelist' }, [
+      el('div', { class: 'filelist__head' }, [
+        el('span', { class: 'filelist__title', text: CH.sources.titulo(listado) }),
+        el('span', { class: 'grow' }),
+        el('button', { class: 'btn btn--ghost btn--sm', text: 'Todos', onclick: () => alternar(true) }),
+        el('button', { class: 'btn btn--ghost btn--sm', text: 'Ninguno', onclick: () => alternar(false) })
+      ]),
+      items,
+      el('div', { class: 'filelist__foot' }, [contador, el('span', { class: 'grow' }), importar])
+    ]));
+
+    if (listado.truncado) {
+      host.appendChild(el('div', {
+        class: 'notice notice--warn',
+        text: 'El repositorio es muy grande y GitHub ha devuelto la lista recortada: puede faltar algún archivo. Prueba a indicar una carpeta concreta.'
+      }));
+    }
+
+    actualizar();
+  }
+
+  async function importarRemotos(listado, seleccion) {
+    const box = $('#import-progress');
+    const fill = $('#import-progress-fill');
+    const text = $('#import-progress-text');
+    box.classList.remove('hidden');
+
+    const categoria = $('#import-category') ? $('#import-category').value : 'auto';
+    const result = await importer.importFromSource(listado, seleccion, {
+      category: categoria === 'auto' ? undefined : categoria,
+      onProgress: function (hechos, total, ruta) {
+        fill.style.width = Math.round((hechos / total) * 100) + '%';
+        text.textContent = hechos + ' de ' + total + ' · ' + ruta;
+      }
+    });
+
+    box.classList.add('hidden');
+    fill.style.width = '0';
+    text.textContent = '';
+    closeModal($('#modal-import'));
+
+    const partes = [];
+    if (result.added) partes.push(result.added + ' añadidos');
+    if (result.duplicated) partes.push(result.duplicated + ' repetidos (omitidos)');
+    if (result.skipped) partes.push(result.skipped + ' descartados');
+    U.toast(partes.length ? partes.join(' · ') : 'No se importó nada', result.added ? 'ok' : 'warn', 5000);
+    if (result.errors.length) {
+      U.toast(result.errors.slice(0, 3).join(' | ') + (result.errors.length > 3 ? ' …' : ''), 'error', 7000);
+    }
+    refreshStorageBox();
   }
 
   function bindPicker(zoneSel, inputSel) {
