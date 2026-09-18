@@ -1,4 +1,4 @@
-/* Construye la versión de un solo archivo del Contenedor HTML.
+/* Construye la versión de un solo archivo del HTML Container.
  *
  *   node tools/construir-unico.mjs
  *
@@ -69,7 +69,7 @@ for (const [etiqueta] of scripts.slice(1)) html = quitar(html, etiqueta);
 html = sustituir(
   html,
   '<!doctype html>\n',
-  '<!doctype html>\n<!--\n  Contenedor HTML — versión de un solo archivo.\n' +
+  '<!doctype html>\n<!--\n  HTML Container — versión de un solo archivo.\n' +
   '  Generada automáticamente con tools/construir-unico.mjs. No la edites a mano:\n' +
   '  cambia los archivos de assets/ y vuelve a generarla.\n-->\n'
 );

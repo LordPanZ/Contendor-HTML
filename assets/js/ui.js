@@ -1,4 +1,4 @@
-/* Contenedor HTML — interfaz: listados, panel de documento, ventanas y atajos */
+/* HTML Container — interfaz: listados, panel de documento, ventanas y atajos */
 window.CH = window.CH || {};
 
 CH.ui = (function () {
@@ -1016,7 +1016,7 @@ CH.ui = (function () {
 
     $('#btn-backup').addEventListener('click', async function () {
       const data = await catalog.exportBackup();
-      const name = 'contenedor-html-' + new Date().toISOString().slice(0, 10) + '.json';
+      const name = 'html-container-' + new Date().toISOString().slice(0, 10) + '.json';
       U.downloadText(JSON.stringify(data, null, 2), name, 'application/json');
       U.toast('Copia de seguridad descargada', 'ok');
     });
@@ -1075,7 +1075,7 @@ CH.ui = (function () {
       ' Si borras los datos del navegador, se borra la colección: guarda copias de vez en cuando.';
 
     const isDefault = await auth.isDefaultPin();
-    $('#app-version').textContent = 'Contenedor HTML · v1.0' +
+    $('#app-version').textContent = 'HTML Container · v1.0' +
       (isDefault ? ' · Sigues con el PIN inicial: cámbialo aquí arriba si usas un equipo compartido.' : '');
 
     openModal('#modal-settings');
@@ -1087,7 +1087,7 @@ CH.ui = (function () {
     U.toast('Preparando el ZIP…');
     try {
       const blob = await catalog.exportZip(docs);
-      U.downloadBlob(blob, 'contenedor-html-' + new Date().toISOString().slice(0, 10) + '.zip');
+      U.downloadBlob(blob, 'html-container-' + new Date().toISOString().slice(0, 10) + '.zip');
       U.toast('ZIP con ' + docs.length + ' documentos descargado (' + (label || '') + ')', 'ok');
     } catch (e) {
       U.toast('No se pudo crear el ZIP: ' + (e.message || e), 'error');

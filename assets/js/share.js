@@ -1,4 +1,4 @@
-/* Contenedor HTML — compartir: enlace autocontenido, archivo suelto o menú del sistema */
+/* HTML Container — compartir: enlace autocontenido, archivo suelto o menú del sistema */
 window.CH = window.CH || {};
 
 CH.share = (function () {

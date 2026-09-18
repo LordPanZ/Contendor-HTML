@@ -1,4 +1,4 @@
-/* Contenedor HTML — utilidades comunes */
+/* HTML Container — utilidades comunes */
 window.CH = window.CH || {};
 
 CH.util = (function () {

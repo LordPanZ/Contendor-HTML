@@ -1,4 +1,4 @@
-/* Contenedor HTML — orígenes remotos: traer documentos de GitHub y de Netlify */
+/* HTML Container — orígenes remotos: traer documentos de GitHub y de Netlify */
 window.CH = window.CH || {};
 
 CH.sources = (function () {

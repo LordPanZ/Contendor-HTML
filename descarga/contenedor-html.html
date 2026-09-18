@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Contenedor HTML — versión de un solo archivo.
+  HTML Container — versión de un solo archivo.
   Generada automáticamente con tools/construir-unico.mjs. No la edites a mano:
   cambia los archivos de assets/ y vuelve a generarla.
 -->
@@ -8,9 +8,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Contenedor HTML: guarda, clasifica, consulta y comparte todos tus archivos HTML desde un único sitio.">
+<meta name="description" content="HTML Container: guarda, clasifica, consulta y comparte todos tus archivos HTML desde un único sitio.">
 <meta name="theme-color" content="#0e1014">
-<title>Contenedor HTML</title>
+<title>HTML Container</title>
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IkNvbnRlbmVkb3IgSFRNTCI+CiAgPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9IiMxMzE3MjAiLz4KICA8cmVjdCB4PSIyOCIgeT0iMjgiIHdpZHRoPSI0NTYiIGhlaWdodD0iNDU2IiByeD0iODgiIGZpbGw9IiMxYTIwMmUiLz4KICA8Zz4KICAgIDxyZWN0IHg9IjExMiIgeT0iMTIyIiB3aWR0aD0iMjg4IiBoZWlnaHQ9Ijg0IiByeD0iMjIiIGZpbGw9IiM5M2E3ZmYiLz4KICAgIDxyZWN0IHg9IjIyNCIgeT0iMTU2IiB3aWR0aD0iNjQiIGhlaWdodD0iMTYiIHJ4PSI4IiBmaWxsPSIjMTMxNzIwIi8+CiAgICA8cmVjdCB4PSIxMTIiIHk9IjIyNiIgd2lkdGg9IjI4OCIgaGVpZ2h0PSI4NCIgcng9IjIyIiBmaWxsPSIjNmQ4YmZmIi8+CiAgICA8cmVjdCB4PSIyMjQiIHk9IjI2MCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjE2IiByeD0iOCIgZmlsbD0iIzEzMTcyMCIvPgogICAgPHJlY3QgeD0iMTEyIiB5PSIzMzAiIHdpZHRoPSIyODgiIGhlaWdodD0iODQiIHJ4PSIyMiIgZmlsbD0iIzRhNjhkYyIvPgogICAgPHJlY3QgeD0iMjI0IiB5PSIzNjQiIHdpZHRoPSI2NCIgaGVpZ2h0PSIxNiIgcng9IjgiIGZpbGw9IiMxMzE3MjAiLz4KICA8L2c+Cjwvc3ZnPgo=">
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HTML Container">
 <style>
-/* Contenedor HTML — hoja de estilos principal */
+/* HTML Container — hoja de estilos principal */
 
 :root {
   --bg: #0e1014;
@@ -531,7 +531,7 @@ a { color: var(--accent); }
 <div class="gate" id="gate">
   <div class="gate__card">
     <div class="gate__logo">🗄️</div>
-    <h1 class="gate__title">Contenedor HTML</h1>
+    <h1 class="gate__title">HTML Container</h1>
     <p class="gate__sub">Introduce tu PIN para abrir la colección</p>
 
     <form id="gate-form" autocomplete="off">
@@ -582,7 +582,7 @@ a { color: var(--accent); }
 
     <div class="topbar__brand">
       <span class="logo">🗄️</span>
-      <span class="topbar__name">Contenedor HTML<small id="brand-sub">tu colección local</small></span>
+      <span class="topbar__name">HTML Container<small id="brand-sub">tu colección local</small></span>
     </div>
 
     <div class="search">
@@ -800,8 +800,10 @@ a { color: var(--accent); }
       <div class="field">
         <label class="field__label" for="nf-token">Token de Netlify</label>
         <input class="input" id="nf-token" type="password" autocomplete="off" placeholder="no se guarda en ningún sitio">
-        <p class="field__hint">Netlify no deja leer la lista de archivos de un sitio sin identificarse. El token se crea en
-          <em>User settings → Applications → Personal access tokens</em> y solo se usa mientras dure esta importación.</p>
+        <p class="field__hint">Netlify no deja leer la lista de archivos de un sitio sin identificarse.
+          <a href="https://app.netlify.com/user/applications#personal-access-tokens" target="_blank" rel="noopener noreferrer">Crear un token</a>
+          (<em>User settings → Applications → Personal access tokens → New access token</em>). Solo se usa mientras dure
+          esta importación: no se guarda en ningún sitio.</p>
       </div>
       <div id="nf-result"></div>
     </div>
@@ -963,7 +965,7 @@ a { color: var(--accent); }
 <script>window.CH_ARCHIVO_UNICO = true;</script>
 <script>
 /* assets/js/util.js */
-/* Contenedor HTML — utilidades comunes */
+/* HTML Container — utilidades comunes */
 window.CH = window.CH || {};
 
 CH.util = (function () {
@@ -1224,7 +1226,7 @@ CH.util = (function () {
 </script>
 <script>
 /* assets/js/store.js */
-/* Contenedor HTML — capa de almacenamiento (IndexedDB con reserva en localStorage) */
+/* HTML Container — capa de almacenamiento (IndexedDB con reserva en localStorage) */
 window.CH = window.CH || {};
 
 CH.store = (function () {
@@ -1489,7 +1491,7 @@ CH.store = (function () {
 </script>
 <script>
 /* assets/js/zip.js */
-/* Contenedor HTML — generador ZIP mínimo (método "store", sin dependencias) */
+/* HTML Container — generador ZIP mínimo (método "store", sin dependencias) */
 window.CH = window.CH || {};
 
 CH.zip = (function () {
@@ -1621,7 +1623,7 @@ CH.zip = (function () {
 </script>
 <script>
 /* assets/js/catalog.js */
-/* Contenedor HTML — catálogo: estado, categorías, filtros, copias de seguridad */
+/* HTML Container — catálogo: estado, categorías, filtros, copias de seguridad */
 window.CH = window.CH || {};
 
 CH.catalog = (function () {
@@ -2010,7 +2012,7 @@ CH.catalog = (function () {
 </script>
 <script>
 /* assets/js/sources.js */
-/* Contenedor HTML — orígenes remotos: traer documentos de GitHub y de Netlify */
+/* HTML Container — orígenes remotos: traer documentos de GitHub y de Netlify */
 window.CH = window.CH || {};
 
 CH.sources = (function () {
@@ -2276,7 +2278,7 @@ CH.sources = (function () {
 </script>
 <script>
 /* assets/js/importer.js */
-/* Contenedor HTML — importación desde archivos, carpetas, arrastrar y soltar, URL o texto */
+/* HTML Container — importación desde archivos, carpetas, arrastrar y soltar, URL o texto */
 window.CH = window.CH || {};
 
 CH.importer = (function () {
@@ -2502,7 +2504,7 @@ CH.importer = (function () {
 </script>
 <script>
 /* assets/js/share.js */
-/* Contenedor HTML — compartir: enlace autocontenido, archivo suelto o menú del sistema */
+/* HTML Container — compartir: enlace autocontenido, archivo suelto o menú del sistema */
 window.CH = window.CH || {};
 
 CH.share = (function () {
@@ -2571,7 +2573,7 @@ CH.share = (function () {
 </script>
 <script>
 /* assets/js/auth.js */
-/* Contenedor HTML — bloqueo de acceso por PIN */
+/* HTML Container — bloqueo de acceso por PIN */
 window.CH = window.CH || {};
 
 CH.auth = (function () {
@@ -2681,7 +2683,7 @@ CH.auth = (function () {
 </script>
 <script>
 /* assets/js/ui.js */
-/* Contenedor HTML — interfaz: listados, panel de documento, ventanas y atajos */
+/* HTML Container — interfaz: listados, panel de documento, ventanas y atajos */
 window.CH = window.CH || {};
 
 CH.ui = (function () {
@@ -3699,7 +3701,7 @@ CH.ui = (function () {
 
     $('#btn-backup').addEventListener('click', async function () {
       const data = await catalog.exportBackup();
-      const name = 'contenedor-html-' + new Date().toISOString().slice(0, 10) + '.json';
+      const name = 'html-container-' + new Date().toISOString().slice(0, 10) + '.json';
       U.downloadText(JSON.stringify(data, null, 2), name, 'application/json');
       U.toast('Copia de seguridad descargada', 'ok');
     });
@@ -3758,7 +3760,7 @@ CH.ui = (function () {
       ' Si borras los datos del navegador, se borra la colección: guarda copias de vez en cuando.';
 
     const isDefault = await auth.isDefaultPin();
-    $('#app-version').textContent = 'Contenedor HTML · v1.0' +
+    $('#app-version').textContent = 'HTML Container · v1.0' +
       (isDefault ? ' · Sigues con el PIN inicial: cámbialo aquí arriba si usas un equipo compartido.' : '');
 
     openModal('#modal-settings');
@@ -3770,7 +3772,7 @@ CH.ui = (function () {
     U.toast('Preparando el ZIP…');
     try {
       const blob = await catalog.exportZip(docs);
-      U.downloadBlob(blob, 'contenedor-html-' + new Date().toISOString().slice(0, 10) + '.zip');
+      U.downloadBlob(blob, 'html-container-' + new Date().toISOString().slice(0, 10) + '.zip');
       U.toast('ZIP con ' + docs.length + ' documentos descargado (' + (label || '') + ')', 'ok');
     } catch (e) {
       U.toast('No se pudo crear el ZIP: ' + (e.message || e), 'error');
@@ -3862,7 +3864,7 @@ CH.ui = (function () {
 </script>
 <script>
 /* assets/js/app.js */
-/* Contenedor HTML — arranque: almacenamiento, bloqueo y carga de la colección */
+/* HTML Container — arranque: almacenamiento, bloqueo y carga de la colección */
 (function () {
   'use strict';
 
@@ -4017,7 +4019,7 @@ CH.ui = (function () {
     }
 
     const title = payload.t || 'Documento compartido';
-    document.title = title + ' · Contenedor HTML';
+    document.title = title + ' · HTML Container';
     $('#shared-title').textContent = title;
 
     const stage = $('#shared-stage');
@@ -4038,7 +4040,7 @@ CH.ui = (function () {
 
   function continueToApp() {
     $('#shared').classList.add('hidden');
-    document.title = 'Contenedor HTML';
+    document.title = 'HTML Container';
     startNormal();
   }
 
@@ -4056,7 +4058,7 @@ CH.ui = (function () {
     await CH.auth.init();
 
     if (CH.store.mode !== 'idb') {
-      console.warn('Contenedor HTML: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
+      console.warn('HTML Container: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
     }
 
     // Dentro de un iframe aislado, leer navigator.serviceWorker lanza excepción

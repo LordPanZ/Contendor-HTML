@@ -1,4 +1,4 @@
-/* Contenedor HTML — service worker: la app funciona sin conexión.
+/* HTML Container — service worker: la app funciona sin conexión.
    Solo guarda en caché los archivos de la propia aplicación; los documentos
    viven en la base de datos del navegador, no aquí. */
 

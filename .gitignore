@@ -15,4 +15,5 @@ playwright-report/
 
 # copias exportadas desde la aplicación
 *.zip
+html-container-*.json
 contenedor-html-*.json

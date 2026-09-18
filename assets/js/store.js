@@ -1,4 +1,4 @@
-/* Contenedor HTML — capa de almacenamiento (IndexedDB con reserva en localStorage) */
+/* HTML Container — capa de almacenamiento (IndexedDB con reserva en localStorage) */
 window.CH = window.CH || {};
 
 CH.store = (function () {

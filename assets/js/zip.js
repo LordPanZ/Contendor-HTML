@@ -1,4 +1,4 @@
-/* Contenedor HTML — generador ZIP mínimo (método "store", sin dependencias) */
+/* HTML Container — generador ZIP mínimo (método "store", sin dependencias) */
 window.CH = window.CH || {};
 
 CH.zip = (function () {

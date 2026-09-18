@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Abre el Contenedor HTML en un servidor local.
+# Abre el HTML Container en un servidor local.
 # Uso:  ./abrir.sh [puerto]        (por defecto 8080)
 set -e
 PUERTO="${1:-8080}"
@@ -7,7 +7,7 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
 echo ""
-echo "  Contenedor HTML"
+echo "  HTML Container"
 echo "  ---------------"
 echo "  Abre esta dirección en tu navegador:"
 echo ""

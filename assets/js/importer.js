@@ -1,4 +1,4 @@
-/* Contenedor HTML — importación desde archivos, carpetas, arrastrar y soltar, URL o texto */
+/* HTML Container — importación desde archivos, carpetas, arrastrar y soltar, URL o texto */
 window.CH = window.CH || {};
 
 CH.importer = (function () {

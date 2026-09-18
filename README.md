@@ -1,4 +1,4 @@
-# 🗄️ Contenedor HTML
+# 🗄️ HTML Container
 
 Una aplicación para **guardar, clasificar, consultar y compartir** todos esos archivos HTML que tienes
 sueltos por el disco duro. Funciona entera en el navegador: no hay servidor, ni cuentas, ni nada que

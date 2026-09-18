@@ -1,4 +1,4 @@
-/* Contenedor HTML — arranque: almacenamiento, bloqueo y carga de la colección */
+/* HTML Container — arranque: almacenamiento, bloqueo y carga de la colección */
 (function () {
   'use strict';
 
@@ -153,7 +153,7 @@
     }
 
     const title = payload.t || 'Documento compartido';
-    document.title = title + ' · Contenedor HTML';
+    document.title = title + ' · HTML Container';
     $('#shared-title').textContent = title;
 
     const stage = $('#shared-stage');
@@ -174,7 +174,7 @@
 
   function continueToApp() {
     $('#shared').classList.add('hidden');
-    document.title = 'Contenedor HTML';
+    document.title = 'HTML Container';
     startNormal();
   }
 
@@ -192,7 +192,7 @@
     await CH.auth.init();
 
     if (CH.store.mode !== 'idb') {
-      console.warn('Contenedor HTML: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
+      console.warn('HTML Container: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
     }
 
     // Dentro de un iframe aislado, leer navigator.serviceWorker lanza excepción

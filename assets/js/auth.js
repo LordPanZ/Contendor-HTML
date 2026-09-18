@@ -1,4 +1,4 @@
-/* Contenedor HTML — bloqueo de acceso por PIN */
+/* HTML Container — bloqueo de acceso por PIN */
 window.CH = window.CH || {};
 
 CH.auth = (function () {

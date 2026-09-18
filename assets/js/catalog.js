@@ -1,4 +1,4 @@
-/* Contenedor HTML — catálogo: estado, categorías, filtros, copias de seguridad */
+/* HTML Container — catálogo: estado, categorías, filtros, copias de seguridad */
 window.CH = window.CH || {};
 
 CH.catalog = (function () {

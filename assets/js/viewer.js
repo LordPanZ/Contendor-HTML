@@ -1,4 +1,4 @@
-/* Contenedor HTML — visor a pantalla completa y receptor de enlaces compartidos */
+/* HTML Container — visor a pantalla completa y receptor de enlaces compartidos */
 (function () {
   'use strict';
 
@@ -27,7 +27,7 @@
   }
 
   function renderDocument(title, html, sandbox) {
-    document.title = title + ' · Contenedor HTML';
+    document.title = title + ' · HTML Container';
     $('#v-title').textContent = title;
     const stage = $('#v-stage');
     stage.textContent = '';

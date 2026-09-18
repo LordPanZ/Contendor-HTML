@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Contenedor HTML: guarda, clasifica, consulta y comparte todos tus archivos HTML desde un único sitio.">
+<meta name="description" content="HTML Container: guarda, clasifica, consulta y comparte todos tus archivos HTML desde un único sitio.">
 <meta name="theme-color" content="#0e1014">
-<title>Contenedor HTML</title>
+<title>HTML Container</title>
 <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
 <div class="gate" id="gate">
   <div class="gate__card">
     <div class="gate__logo">🗄️</div>
-    <h1 class="gate__title">Contenedor HTML</h1>
+    <h1 class="gate__title">HTML Container</h1>
     <p class="gate__sub">Introduce tu PIN para abrir la colección</p>
 
     <form id="gate-form" autocomplete="off">
@@ -72,7 +72,7 @@
 
     <div class="topbar__brand">
       <span class="logo">🗄️</span>
-      <span class="topbar__name">Contenedor HTML<small id="brand-sub">tu colección local</small></span>
+      <span class="topbar__name">HTML Container<small id="brand-sub">tu colección local</small></span>
     </div>
 
     <div class="search">
@@ -290,8 +290,10 @@
       <div class="field">
         <label class="field__label" for="nf-token">Token de Netlify</label>
         <input class="input" id="nf-token" type="password" autocomplete="off" placeholder="no se guarda en ningún sitio">
-        <p class="field__hint">Netlify no deja leer la lista de archivos de un sitio sin identificarse. El token se crea en
-          <em>User settings → Applications → Personal access tokens</em> y solo se usa mientras dure esta importación.</p>
+        <p class="field__hint">Netlify no deja leer la lista de archivos de un sitio sin identificarse.
+          <a href="https://app.netlify.com/user/applications#personal-access-tokens" target="_blank" rel="noopener noreferrer">Crear un token</a>
+          (<em>User settings → Applications → Personal access tokens → New access token</em>). Solo se usa mientras dure
+          esta importación: no se guarda en ningún sitio.</p>
       </div>
       <div id="nf-result"></div>
     </div>
