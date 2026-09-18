@@ -474,8 +474,7 @@ CH.ui = (function () {
     pane.appendChild(frame);
     frame.srcdoc = ui.currentHtml;
 
-    $$('.drawer__tab').forEach((t, i) => t.classList.toggle('is-active', i === 0));
-    $$('.drawer__pane').forEach((p) => p.classList.toggle('is-active', p.dataset.pane === 'preview'));
+    showPane('preview');
     $('#drawer').classList.remove('hidden');
     catalog.markOpened(id);
   }
@@ -538,13 +537,32 @@ CH.ui = (function () {
     openDoc(res.doc.id);
   }
 
-  function openFullscreen(id) {
+  async function openFullscreen(id) {
     if (!id) return;
     catalog.markOpened(id);
+
+    // En la versión de un solo archivo no hay visor aparte: se agranda la vista previa.
+    if (window.CH_ARCHIVO_UNICO) {
+      if (ui.currentId !== id) await openDoc(id);
+      showPane('preview');
+      const pane = $('#pane-preview');
+      if (pane.requestFullscreen) {
+        pane.requestFullscreen().catch(() => U.toast('El navegador no ha permitido la pantalla completa', 'warn'));
+      } else {
+        U.toast('Este navegador no permite la pantalla completa', 'warn');
+      }
+      return;
+    }
+
     // Sin "noopener" a propósito: así la pestaña nueva hereda la sesión abierta
     // y el visor no vuelve a pedir el PIN. El documento se muestra aislado
     // dentro de un iframe con permisos limitados.
     window.open('viewer.html?id=' + encodeURIComponent(id), '_blank');
+  }
+
+  function showPane(name) {
+    $$('.drawer__tab').forEach((t) => t.classList.toggle('is-active', t.dataset.pane === name));
+    $$('.drawer__pane').forEach((p) => p.classList.toggle('is-active', p.dataset.pane === name));
   }
 
   function fillCategorySelect(select, value, includeAuto) {

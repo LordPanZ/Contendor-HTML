@@ -39,6 +39,29 @@
   </div>
 </div>
 
+<!-- ======================= Documento recibido por enlace ======================= -->
+<div class="shared hidden" id="shared">
+  <header class="vbar">
+    <span class="vbar__logo">🗄️</span>
+    <span class="vbar__title" id="shared-title">Documento compartido</span>
+    <span class="vbar__badge">compartido contigo</span>
+    <button class="btn btn--sm" id="shared-save">＋ <span class="label">Guardar en mi contenedor</span></button>
+    <button class="btn btn--sm" id="shared-download">⬇️ <span class="label">Descargar</span></button>
+  </header>
+
+  <div class="vstage" id="shared-stage"></div>
+
+  <div class="vmsg hidden" id="shared-error">
+    <div class="vmsg__card">
+      <div class="vmsg__icon">⚠️</div>
+      <h1 class="vmsg__title">Enlace no válido</h1>
+      <p class="vmsg__text">El enlace está incompleto o se ha cortado al copiarlo. Pide que te lo manden otra vez,
+        o que te envíen directamente el archivo .html.</p>
+      <button class="btn btn--primary" id="shared-continue">Ir a mi contenedor</button>
+    </div>
+  </div>
+</div>
+
 <!-- ======================= Aplicación ======================= -->
 <div class="app hidden" id="app">
 

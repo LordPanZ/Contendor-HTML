@@ -12,8 +12,10 @@ CH.share = (function () {
 
   const isLocalFile = () => location.protocol === 'file:';
 
-  function viewerBase() {
-    return new URL('viewer.html', location.href).href.split('#')[0];
+  /** La propia página recibe los enlaces compartidos, así que el enlace apunta a ella misma.
+      Así funciona igual servida en la web que como archivo único descargado. */
+  function appBase() {
+    return location.href.split('#')[0].split('?')[0];
   }
 
   /** Empaqueta el documento dentro del propio enlace: no hace falta servidor ni base de datos. */
@@ -25,7 +27,7 @@ CH.share = (function () {
       h: html
     });
     const packed = await U.packText(payload);
-    const url = viewerBase() + '#d=' + packed;
+    const url = appBase() + '#d=' + packed;
     return {
       url: url,
       length: url.length,

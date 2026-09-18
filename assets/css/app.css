@@ -398,6 +398,39 @@ a { color: var(--accent); }
 .stat__value { font-size: 20px; font-weight: 650; }
 .stat__label { font-size: 12px; color: var(--muted); }
 
+/* ---------------- visor de documentos (viewer.html y enlaces compartidos) ---------------- */
+
+.viewer-page { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+
+.shared {
+  position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; background: var(--bg);
+}
+
+.vbar {
+  display: flex; align-items: center; gap: 10px; padding: 9px 14px; flex: none;
+  border-bottom: 1px solid var(--border); background: var(--bg-soft);
+}
+.vbar__logo { font-size: 20px; flex: none; }
+.vbar__title { font-weight: 620; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.vbar__badge { font-size: 11px; color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; flex: none; }
+
+.vstage { flex: 1; min-height: 0; background: #fff; }
+.vstage iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+.vmsg { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.vmsg__card {
+  max-width: 420px; text-align: center; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px 24px; box-shadow: var(--shadow);
+}
+.vmsg__icon { font-size: 36px; margin-bottom: 10px; }
+.vmsg__title { font-size: 18px; margin: 0 0 8px; }
+.vmsg__text { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
+
+@media (max-width: 560px) {
+  .vbar { padding: 8px 10px; gap: 8px; }
+  .vbar__badge, .vbar .label { display: none; }
+}
+
 /* ---------------- avisos flotantes ---------------- */
 
 .toasts { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }

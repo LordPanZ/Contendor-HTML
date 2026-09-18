@@ -10,23 +10,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Contenedor">
 <link rel="stylesheet" href="assets/css/app.css">
-<style>
-  body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
-  .vbar {
-    display: flex; align-items: center; gap: 10px; padding: 9px 14px; flex: none;
-    border-bottom: 1px solid var(--border); background: var(--bg-soft);
-  }
-  .vbar__title { font-weight: 620; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-  .vbar__badge { font-size: 11px; color: var(--muted); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; flex: none; }
-  .vstage { flex: 1; min-height: 0; background: #fff; }
-  .vstage iframe { width: 100%; height: 100%; border: 0; display: block; }
-  .vmsg { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
-  .vmsg__card { max-width: 420px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px 24px; box-shadow: var(--shadow); }
-  .vmsg__icon { font-size: 36px; margin-bottom: 10px; }
-  @media (max-width: 560px) { .vbar__badge, .vbar .label { display: none; } }
-</style>
 </head>
-<body>
+<body class="viewer-page">
 
 <header class="vbar">
   <a class="btn btn--ghost btn--icon" href="index.html" title="Ir al contenedor" aria-label="Ir al contenedor">🗄️</a>
@@ -41,8 +26,8 @@
 <div class="vmsg hidden" id="v-msg">
   <div class="vmsg__card">
     <div class="vmsg__icon" id="v-msg-icon">🔒</div>
-    <h1 style="font-size:18px;margin:0 0 8px" id="v-msg-title">Contenedor bloqueado</h1>
-    <p style="color:var(--muted);font-size:14px;margin:0 0 18px" id="v-msg-text"></p>
+    <h1 class="vmsg__title" id="v-msg-title">Contenedor bloqueado</h1>
+    <p class="vmsg__text" id="v-msg-text"></p>
     <a class="btn btn--primary" href="index.html" id="v-msg-action">Abrir el contenedor</a>
   </div>
 </div>

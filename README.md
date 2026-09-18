@@ -8,6 +8,23 @@ Al entrar pide un **PIN de acceso**, que de fábrica es **9441** (se puede cambi
 
 ---
 
+## Descargar la app
+
+En [`descarga/contenedor-html.html`](descarga/contenedor-html.html) tienes la **aplicación entera en un
+solo archivo** (unos 140 KB): estilos, código e iconos van dentro. No necesita instalación ni conexión.
+
+- **En el ordenador**: descárgalo y ábrelo con doble clic.
+- **En el móvil**: mejor usarla desde una dirección web (ver abajo). Los navegadores móviles restringen
+  mucho los archivos HTML abiertos desde la carpeta de descargas y puede que no guarde nada.
+
+Ese archivo se genera a partir del código fuente; para regenerarlo después de cambiar algo:
+
+```bash
+node tools/construir-unico.mjs
+```
+
+---
+
 ## Cómo abrirla
 
 ### Opción 1 · En tu ordenador (recomendada)
@@ -37,10 +54,15 @@ Publicar la app **no publica tus documentos**: siguen guardados en el navegador 
 se publica es solo el programa. A partir de ahí, los enlaces que generes al compartir sí funcionarán para
 los demás.
 
-### Opción 3 · Instalarla como aplicación
+### Opción 3 · Instalarla como aplicación (lo más cómodo en el móvil)
 
 Servida por `http(s)`, el navegador ofrece *Instalar aplicación*. Queda con su icono, se abre en su propia
 ventana y funciona sin conexión.
+
+- **Android (Chrome)**: menú ⋮ → *Añadir a pantalla de inicio* / *Instalar aplicación*.
+- **iPhone (Safari)**: botón Compartir → *Añadir a pantalla de inicio*.
+
+Instalada así, la colección se guarda igual que en el ordenador y sigue funcionando sin cobertura.
 
 ---
 
@@ -83,9 +105,10 @@ Y con *Abrir* se ve a pantalla completa en una pestaña aparte.
 
 ### Compartir
 
-- **Enlace con el documento dentro.** El HTML viaja comprimido (gzip + base64) en el propio enlace.
-  Quien lo reciba lo abre y lo ve, sin instalar nada y sin pedirle ningún PIN; además puede guardarlo en
-  su propio contenedor con un botón. No se sube nada a ningún servidor: si la app está publicada, el
+- **Enlace con el documento dentro.** El HTML viaja comprimido (gzip + base64) en el propio enlace, que
+  apunta a la misma dirección de la app. Quien lo reciba lo abre y lo ve, sin instalar nada y sin pedirle
+  ningún PIN (el PIN protege tu colección, no el documento que compartes); además puede guardarlo en su
+  propio contenedor con un botón. No se sube nada a ningún servidor: si la app está publicada, el
   enlace funciona para cualquiera; si la usas en local, solo funcionará en tu equipo (la app te lo avisa).
   Los documentos muy grandes generan enlaces muy largos: ahí es mejor mandar el archivo.
 - **Menú de compartir del sistema** (móviles y Safari): manda el enlace o el archivo por WhatsApp, correo…
@@ -141,9 +164,11 @@ navegador), puedes activarle *Modo de confianza* en su pestaña «Datos»; hazlo
 ## Estructura del proyecto
 
 ```
-index.html               Aplicación (bloqueo + interfaz)
-viewer.html              Visor a pantalla completa y receptor de enlaces compartidos
-abrir.sh                 Arranca un servidor local
+index.html                   Aplicación: bloqueo, interfaz y recepción de enlaces compartidos
+viewer.html                  Visor a pantalla completa (versión servida)
+descarga/contenedor-html.html  La app entera en un archivo (generada)
+tools/construir-unico.mjs    Genera ese archivo único
+abrir.sh                     Arranca un servidor local
 manifest.webmanifest     Datos para instalarla como aplicación
 sw.js                    Service worker (funcionamiento sin conexión)
 assets/css/app.css       Estilos (tema oscuro y claro)

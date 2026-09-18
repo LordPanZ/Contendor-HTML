@@ -24,12 +24,21 @@
     });
   }
 
+  let gateReady = false;
+
   async function showGate() {
     const gate = $('#gate');
     const form = $('#gate-form');
     const pin = $('#gate-pin');
     const error = $('#gate-error');
     const remember = $('#gate-remember');
+
+    gate.classList.remove('hidden');
+    if (gateReady) {
+      setTimeout(() => pin.focus(), 60);
+      return;
+    }
+    gateReady = true;
 
     buildKeypad();
     remember.checked = await CH.auth.rememberEnabled();
@@ -42,7 +51,6 @@
       $('#gate-foot').textContent = 'Aviso: este navegador no permite guardar datos aquí. Abre la app desde un servidor local (mira el README).';
     }
 
-    gate.classList.remove('hidden');
     setTimeout(() => pin.focus(), 60);
 
     form.addEventListener('submit', async function (ev) {
@@ -87,7 +95,7 @@
     sub.textContent = n ? n + (n === 1 ? ' documento guardado' : ' documentos guardados') : 'tu colección local';
   }
 
-  /** Guarda un documento que llega desde un enlace compartido (viewer.html → "Guardar en mi contenedor"). */
+  /** Guarda el documento que llega en un enlace compartido, tras pasar por el PIN. */
   async function absorbSharedLink() {
     const hash = location.hash || '';
     if (hash.indexOf('#guardar=') !== 0) return;
@@ -111,6 +119,67 @@
     }
   }
 
+  /* ---------------- documento recibido por enlace ---------------- */
+
+  const SANDBOX = 'allow-scripts allow-forms allow-modals allow-popups allow-downloads';
+
+  /** Alguien comparte un documento contigo: se ve sin PIN, porque el enlace ya trae el documento.
+      Se muestra aislado (sin acceso a los datos de la aplicación). */
+  async function showSharedDocument(packed) {
+    const panel = $('#shared');
+    // El PIN protege tu colección, no el documento que te acaban de compartir.
+    $('#gate').classList.add('hidden');
+    panel.classList.remove('hidden');
+    $('#shared-continue').addEventListener('click', continueToApp);
+
+    let payload = null;
+    try {
+      payload = JSON.parse(await U.unpackText(packed));
+    } catch (e) { payload = null; }
+
+    if (!payload || typeof payload.h !== 'string') {
+      $('#shared-stage').classList.add('hidden');
+      $('#shared-error').classList.remove('hidden');
+      $('#shared-save').classList.add('hidden');
+      $('#shared-download').classList.add('hidden');
+      return;
+    }
+
+    const title = payload.t || 'Documento compartido';
+    document.title = title + ' · Contenedor HTML';
+    $('#shared-title').textContent = title;
+
+    const stage = $('#shared-stage');
+    const frame = U.el('iframe', { sandbox: SANDBOX, title: title });
+    stage.appendChild(frame);
+    frame.srcdoc = payload.h;
+
+    $('#shared-download').addEventListener('click', function () {
+      U.downloadText(payload.h, U.safeFileName(title, '.html'));
+    });
+
+    $('#shared-save').addEventListener('click', function () {
+      // El contenedor pedirá el PIN y lo guardará nada más entrar.
+      location.hash = '#guardar=' + packed;
+      continueToApp();
+    });
+  }
+
+  function continueToApp() {
+    $('#shared').classList.add('hidden');
+    document.title = 'Contenedor HTML';
+    startNormal();
+  }
+
+  async function startNormal() {
+    if (CH.auth.sessionOpen()) {
+      $('#gate').classList.add('hidden');
+      await bootApp();
+    } else {
+      await showGate();
+    }
+  }
+
   async function main() {
     await CH.store.init();
     await CH.auth.init();
@@ -119,16 +188,17 @@
       console.warn('Contenedor HTML: almacenamiento en modo "' + CH.store.mode + '".', CH.store.lastError || '');
     }
 
-    if (CH.auth.sessionOpen()) {
-      $('#gate').classList.add('hidden');
-      await bootApp();
-    } else {
-      await showGate();
-    }
-
-    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    if (!window.CH_ARCHIVO_UNICO && 'serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
       navigator.serviceWorker.register('sw.js').catch(function () { /* sin modo sin conexión */ });
     }
+
+    const hash = location.hash || '';
+    if (hash.indexOf('#d=') === 0) {
+      await showSharedDocument(hash.slice(3));
+      return;
+    }
+
+    await startNormal();
   }
 
   main().catch(function (err) {
