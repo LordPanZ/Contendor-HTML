@@ -70,9 +70,9 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         run: |
+          # Sin --build la CLI no compila nada: publica la carpeta tal cual.
           npx -y netlify-cli@17 deploy \
             --prod \
-            --no-build \
             --dir _sitio \
             --site "$NETLIFY_SITE_ID" \
             --message "Publicado desde GitHub Actions (${GITHUB_SHA::7})"
