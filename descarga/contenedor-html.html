@@ -3,7 +3,6 @@
   Contenedor HTML — versión de un solo archivo.
   Generada automáticamente con tools/construir-unico.mjs. No la edites a mano:
   cambia los archivos de assets/ y vuelve a generarla.
-  PIN inicial: 9441 (se cambia desde Ajustes).
 -->
 <html lang="es" data-theme="dark">
 <head>
@@ -17,7 +16,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Contenedor">
+<meta name="apple-mobile-web-app-title" content="HTML Container">
 <style>
 /* Contenedor HTML — hoja de estilos principal */
 
@@ -3232,7 +3231,8 @@ CH.ui = (function () {
       ' Si borras los datos del navegador, se borra la colección: guarda copias de vez en cuando.';
 
     const isDefault = await auth.isDefaultPin();
-    $('#app-version').textContent = 'Contenedor HTML · v1.0' + (isDefault ? ' · PIN por defecto (9441): cámbialo si lo usas en un equipo compartido.' : '');
+    $('#app-version').textContent = 'Contenedor HTML · v1.0' +
+      (isDefault ? ' · Sigues con el PIN inicial: cámbialo aquí arriba si usas un equipo compartido.' : '');
 
     openModal('#modal-settings');
   }
@@ -3379,10 +3379,6 @@ CH.ui = (function () {
 
     buildKeypad();
     remember.checked = await CH.auth.rememberEnabled();
-
-    if (await CH.auth.isDefaultPin()) {
-      $('#gate-foot').textContent = 'PIN inicial: 9441 — puedes cambiarlo desde Ajustes.';
-    }
 
     if (CH.store.mode === 'memory') {
       $('#gate-foot').textContent = 'Aviso: este navegador no permite guardar datos aquí. Abre la app desde un servidor local (mira el README).';

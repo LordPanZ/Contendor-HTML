@@ -71,8 +71,7 @@ html = sustituir(
   '<!doctype html>\n',
   '<!doctype html>\n<!--\n  Contenedor HTML — versión de un solo archivo.\n' +
   '  Generada automáticamente con tools/construir-unico.mjs. No la edites a mano:\n' +
-  '  cambia los archivos de assets/ y vuelve a generarla.\n' +
-  '  PIN inicial: 9441 (se cambia desde Ajustes).\n-->\n'
+  '  cambia los archivos de assets/ y vuelve a generarla.\n-->\n'
 );
 
 fs.mkdirSync(path.dirname(salida), { recursive: true });

@@ -43,10 +43,6 @@
     buildKeypad();
     remember.checked = await CH.auth.rememberEnabled();
 
-    if (await CH.auth.isDefaultPin()) {
-      $('#gate-foot').textContent = 'PIN inicial: 9441 — puedes cambiarlo desde Ajustes.';
-    }
-
     if (CH.store.mode === 'memory') {
       $('#gate-foot').textContent = 'Aviso: este navegador no permite guardar datos aquí. Abre la app desde un servidor local (mira el README).';
     }

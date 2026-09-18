@@ -4,7 +4,8 @@ Una aplicación para **guardar, clasificar, consultar y compartir** todos esos a
 sueltos por el disco duro. Funciona entera en el navegador: no hay servidor, ni cuentas, ni nada que
 subir a ningún sitio. Los documentos se quedan en tu equipo.
 
-Al entrar pide un **PIN de acceso**, que de fábrica es **9441** (se puede cambiar desde Ajustes).
+Al entrar pide un **PIN de acceso**. El inicial está definido en `assets/js/auth.js` (`DEFAULT_PIN`)
+y conviene cambiarlo desde *Ajustes* la primera vez que la abras.
 
 ---
 
@@ -146,7 +147,7 @@ se borra la colección.
 
 ## El PIN de acceso
 
-- De fábrica es **9441**; se cambia en *Ajustes → PIN de acceso*.
+- El inicial se define en `assets/js/auth.js` (`DEFAULT_PIN`); cámbialo en *Ajustes → PIN de acceso*.
 - Tras 5 intentos fallidos hay que esperar 20 segundos.
 - «Recordar en este dispositivo» mantiene la sesión 30 días; si no, se pide el PIN en cada sesión nueva
   del navegador. El botón 🔒 de la barra superior bloquea al instante.
@@ -157,7 +158,7 @@ se borra la colección.
 las herramientas del navegador. No lo uses como caja fuerte para material sensible.
 
 **¿Y si olvidas el PIN?** No se pierde nada. Abre la app, pulsa F12 (consola del navegador), pega esto y
-recarga: el PIN vuelve a ser 9441 y los documentos siguen ahí.
+recarga: el PIN vuelve al inicial y los documentos siguen ahí.
 
 ```js
 indexedDB.open('contenedor-html').onsuccess = (e) =>

@@ -934,7 +934,8 @@ CH.ui = (function () {
       ' Si borras los datos del navegador, se borra la colección: guarda copias de vez en cuando.';
 
     const isDefault = await auth.isDefaultPin();
-    $('#app-version').textContent = 'Contenedor HTML · v1.0' + (isDefault ? ' · PIN por defecto (9441): cámbialo si lo usas en un equipo compartido.' : '');
+    $('#app-version').textContent = 'Contenedor HTML · v1.0' +
+      (isDefault ? ' · Sigues con el PIN inicial: cámbialo aquí arriba si usas un equipo compartido.' : '');
 
     openModal('#modal-settings');
   }
